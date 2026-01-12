@@ -1,7 +1,7 @@
 {
-    "name": "unlim-cloud",
+    "name": "t-vault",
     "version": "1.0.1",
-    "description": "UnlimCloud - Unlimited Cloud Storage via Telegram",
+    "description": "T-Vault - Unlimited Cloud Storage via Telegram",
     "type": "module",
     "scripts": {
         "dev": "vite",

@@ -1,17 +1,17 @@
 [package]
-name = "unlim-cloud"
+name = "t-vault"
 version = "1.0.1"
-description = "UnlimCloud - Unlimited Cloud Storage via Telegram"
-authors = ["UnlimCloud Team"]
+description = "T-Vault - Unlimited Cloud Storage via Telegram"
+authors = ["T-Vault Team"]
 license = "MIT"
-repository = "https://github.com/inulute/unlim-cloud"
+repository = "https://github.com/inulute/t-vault"
 edition = "2021"
 
 [build-dependencies]
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.5", features = ["shell-open", "dialog-all", "fs-all", "path-all"] }
+tauri = { version = "1.5", features = [ "protocol-all", "shell-open", "dialog-all", "fs-all", "path-all"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.35", features = ["full"] }
@@ -29,7 +29,14 @@ grammers-session = "0.8"
 grammers-mtsender = "0.8"
 futures = "0.3"
 tokio-stream = "0.1"
+lazy_static = "1.4"
 
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

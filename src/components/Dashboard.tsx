@@ -46,7 +46,7 @@ export default function Dashboard() {
         {/* Content Area */}
         <div className="flex-1 overflow-hidden bg-gray-50">
           {currentView === 'files' && (
-            <div className="animate-fadeIn">
+            <div className="h-full animate-fadeIn">
               <FileManager
                 currentFolder={currentFolder}
                 onFolderChange={setCurrentFolder}
@@ -55,12 +55,12 @@ export default function Dashboard() {
             </div>
           )}
           {currentView === 'gallery' && (
-            <div className="animate-fadeIn">
+            <div className="h-full animate-fadeIn">
               <Gallery toast={{ showSuccess, showError, showInfo, showWarning }} />
             </div>
           )}
           {currentView === 'settings' && (
-            <div className="animate-fadeIn">
+            <div className="h-full animate-fadeIn">
               <Settings />
             </div>
           )}

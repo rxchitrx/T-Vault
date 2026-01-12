@@ -12,8 +12,8 @@ import {
   ChevronRight,
   Search,
 } from 'lucide-react';
-import Confetti from './Confetti';
 import { FileListSkeleton } from './SkeletonLoader';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface FileMetadata {
   id: string;
@@ -46,19 +46,42 @@ export default function FileManager({
 }: FileManagerProps) {
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFolderDialog, setShowFolderDialog] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
-  const [showConfetti, setShowConfetti] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{
     file: string;
     status: string;
     progress: number;
     error?: string;
   } | null>(null);
+  
+  const [fileToDelete, setFileToDelete] = useState<FileMetadata | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const loadFiles = async (showSkeleton = true) => {
+    if (showSkeleton) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
+    
+    try {
+      const fileList = await invoke<FileMetadata[]>('list_files', {
+        folder: currentFolder,
+      });
+      setFiles(fileList);
+    } catch (error) {
+      console.error('Failed to load files:', error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    loadFiles();
+    loadFiles(true);
     
     // Listen for upload progress events
     let unlistenFn: (() => void) | null = null;
@@ -71,20 +94,18 @@ export default function FileManager({
           
           // Clear progress after completion/error and refresh file list
           if (data.status === 'completed' || data.status === 'error') {
-            if (data.status === 'completed') {
-              setShowConfetti(true);
-              toast?.showSuccess(`"${data.file}" uploaded successfully!`, 3000);
-            } else {
+            if (data.status === 'error') {
               toast?.showError(data.error || 'Upload failed', 4000);
             }
-            // Delay refresh slightly to ensure backend has finished processing
+            // For completed uploads, wait a bit to show the success state, then smoothly clear
+            const clearDelay = data.status === 'completed' ? 1500 : 1000;
             setTimeout(() => {
               setUploadProgress(null);
-              // Small delay before refresh to ensure metadata is saved
+              // Refresh list after progress bar is cleared to avoid flash
               setTimeout(() => {
-                loadFiles();
-              }, 500);
-            }, 2000);
+                loadFiles(false);
+              }, 100);
+            }, clearDelay);
           }
         });
         
@@ -103,20 +124,6 @@ export default function FileManager({
       }
     };
   }, [currentFolder]);
-
-  const loadFiles = async () => {
-    setIsLoading(true);
-    try {
-      const fileList = await invoke<FileMetadata[]>('list_files', {
-        folder: currentFolder,
-      });
-      setFiles(fileList);
-    } catch (error) {
-      console.error('Failed to load files:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleUpload = async () => {
     try {
@@ -174,16 +181,13 @@ export default function FileManager({
     setShowFolderDialog(false);
     
     try {
-      console.log('Calling create_folder with:', { folderName: trimmedName, parentFolder: currentFolder });
-      
-      const result = await invoke('create_folder', {
+      await invoke('create_folder', {
         folderName: trimmedName,
         parentFolder: currentFolder,
       });
       
-      console.log('Folder created successfully:', result);
       toast?.showSuccess(`Folder "${trimmedName}" created`, 2000);
-      await loadFiles();
+      await loadFiles(false);
     } catch (error) {
       console.error('Failed to create folder:', error);
       toast?.showError(`Failed to create folder: ${error}`, 3000);
@@ -195,26 +199,38 @@ export default function FileManager({
     setNewFolderName('');
   };
 
-  const handleDelete = async (fileId: string) => {
+  const handleDelete = (fileId: string) => {
     const file = files.find(f => f.id === fileId);
-    if (confirm(`Are you sure you want to delete "${file?.name || 'this file'}"?`)) {
-      try {
-        await invoke('delete_file', { fileId });
-        toast?.showSuccess(`"${file?.name || 'File'}" deleted`, 2000);
-        loadFiles();
-      } catch (error) {
-        console.error('Failed to delete file:', error);
-        toast?.showError('Failed to delete file', 3000);
-      }
+    if (file) {
+      setFileToDelete(file);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await invoke('delete_file', { fileId: fileToDelete.id });
+      toast?.showSuccess(`"${fileToDelete.name}" deleted`, 2000);
+      loadFiles(false);
+    } catch (error) {
+      console.error('Failed to delete file:', error);
+      toast?.showError('Failed to delete file', 3000);
+    } finally {
+      setIsDeleting(false);
+      setFileToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setFileToDelete(null);
   };
 
   const handleDownload = async (fileId: string, fileName: string) => {
     try {
-      // Extract extension from filename for proper filter
       const ext = fileName.includes('.') ? fileName.split('.').pop() || '' : '';
       
-      // Open save dialog
       const savePath = await save({
         defaultPath: fileName,
         filters: ext ? [{
@@ -224,7 +240,6 @@ export default function FileManager({
       });
 
       if (savePath) {
-        console.log('Download path:', savePath);
         toast?.showInfo(`Downloading "${fileName}"...`, 2000);
 
         await invoke('download_file', {
@@ -264,12 +279,6 @@ export default function FileManager({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Confetti Effect */}
-      {showConfetti && (
-        <Confetti onComplete={() => setShowConfetti(false)} />
-      )}
-
-      {/* Folder Creation Dialog */}
       {showFolderDialog && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
           <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4 shadow-large animate-scaleIn">
@@ -302,9 +311,17 @@ export default function FileManager({
           </div>
         </div>
       )}
-      {/* Upload Progress */}
+
+      <DeleteConfirmationModal
+        isOpen={!!fileToDelete}
+        fileName={fileToDelete?.name || ''}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        isDeleting={isDeleting}
+      />
+      
       {uploadProgress && (
-        <div className={`px-8 py-3.5 border-b ${
+        <div className={`px-8 py-3.5 border-b transition-opacity duration-300 ${
           uploadProgress.status === 'error' 
             ? 'bg-red-50/50 border-red-100' 
             : uploadProgress.status === 'completed'
@@ -333,7 +350,7 @@ export default function FileManager({
               <div className="flex items-center space-x-3">
                 <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gray-900 transition-all duration-500 ease-out rounded-full"
+                    className="h-full bg-gray-900 transition-all duration-200 ease-out rounded-full"
                     style={{ width: `${uploadProgress.progress}%` }}
                   />
                 </div>
@@ -347,10 +364,8 @@ export default function FileManager({
         </div>
       )}
 
-      {/* Toolbar */}
       <div className="bg-white border-b border-gray-100 px-8 py-4">
         <div className="flex items-center justify-between mb-4">
-          {/* Breadcrumb */}
           <div className="flex items-center space-x-1.5 text-sm">
             <button
               onClick={() => onFolderChange('/')}
@@ -374,7 +389,6 @@ export default function FileManager({
               ))}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center space-x-2">
             <button 
               onClick={handleUpload} 
@@ -387,7 +401,6 @@ export default function FileManager({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('New Folder button clicked');
                 handleCreateFolder();
               }} 
               className="btn btn-secondary ripple-effect group relative overflow-hidden"
@@ -399,7 +412,6 @@ export default function FileManager({
           </div>
         </div>
 
-        {/* Search */}
         <div className="relative group">
           <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors duration-200 group-focus-within:text-gray-600" />
           <input
@@ -412,7 +424,6 @@ export default function FileManager({
         </div>
       </div>
 
-      {/* File List */}
       <div className="flex-1 overflow-auto px-8 py-6">
         {isLoading ? (
           <FileListSkeleton />
@@ -429,8 +440,8 @@ export default function FileManager({
             {filteredFiles.map((file, index) => (
               <div
                 key={file.id}
-                className="card-hover p-4 cursor-pointer group animate-fadeIn"
-                style={{ animationDelay: `${index * 0.03}s`, animationFillMode: 'both' }}
+                className={`card-hover p-4 cursor-pointer group ${!isRefreshing ? 'animate-fadeIn' : ''}`}
+                style={!isRefreshing ? { animationDelay: `${index * 0.03}s`, animationFillMode: 'both' } : {}}
                 onClick={() => handleFileClick(file)}
               >
                 <div className="flex items-center justify-between">

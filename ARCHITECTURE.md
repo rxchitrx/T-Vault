@@ -1,10 +1,10 @@
-# UnlimCloud Architecture
+# T-Vault Architecture
 
-This document explains how UnlimCloud works under the hood.
+This document explains how T-Vault works under the hood.
 
 ## Overview
 
-UnlimCloud is a desktop application that uses Telegram as a storage backend. It's built with:
+T-Vault is a desktop application that uses Telegram as a storage backend. It's built with:
 
 - **Frontend**: React + TypeScript + Tailwind CSS
 - **Backend**: Rust + Tauri
@@ -251,7 +251,7 @@ The app uses mock data in development mode for faster testing without hitting Te
 
 ### "Session expired"
 
-Delete `unlim_session.bin` and log in again.
+Delete `tvault_session.bin` and log in again.
 
 ### "Rate limit exceeded"
 

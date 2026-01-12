@@ -138,16 +138,16 @@ export default function Settings() {
 
           <div className="space-y-4">
             <div className="py-3 border-b border-gray-100">
-              <p className="text-xs text-gray-500 mb-2 font-medium">Version 1.0.0</p>
+              <p className="text-xs text-gray-500 mb-2 font-medium">Version 1.0.1</p>
               <p className="text-xs text-gray-500 leading-relaxed">
-                UnlimCloud provides unlimited cloud storage by leveraging Telegram as the
+                T-Vault provides unlimited cloud storage by leveraging Telegram as the
                 storage backend.
               </p>
             </div>
 
             <div className="flex items-center space-x-4">
               <a
-                href="https://github.com/inulute/unlim-cloud"
+                href="https://github.com/inulute/t-vault"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-secondary"

@@ -23,7 +23,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         }
       } catch (err) {
         // Not authenticated, continue with login flow
-        console.log('Not authenticated, showing login screen');
       }
     };
     checkAuth();
@@ -70,7 +69,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-900 rounded-2xl mb-5 animate-scaleIn">
               <Cloud className="w-7 h-7 text-white animate-bounce-subtle" />
             </div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2 tracking-tight animate-slideUp" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>UnlimCloud</h1>
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2 tracking-tight animate-slideUp" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>T-Vault</h1>
             <p className="text-sm text-gray-500 animate-slideUp" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>Sign in with your Telegram account</p>
           </div>
 

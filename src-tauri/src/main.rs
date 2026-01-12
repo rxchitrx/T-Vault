@@ -127,11 +127,20 @@ async fn upload_file(
     app_handle.emit_all("upload-progress", serde_json::json!({
         "file": file_name,
         "status": "reading",
-        "progress": 10
+        "progress": 5
     })).ok();
     
     // Perform upload (client_ref is Arc, so no lock needed)
-    let result = storage::upload_file(client_ref, &file_path, &folder).await;
+    let app_handle_clone = app_handle.clone();
+    let file_name_clone = file_name.to_string();
+    
+    let result = storage::upload_file(client_ref, &file_path, &folder, move |progress| {
+        app_handle_clone.emit_all("upload-progress", serde_json::json!({
+            "file": file_name_clone,
+            "status": "uploading",
+            "progress": progress
+        })).ok();
+    }).await;
     
     // Emit result after upload completes
     match &result {
@@ -164,15 +173,38 @@ async fn download_file(
     destination: String,
     state: tauri::State<'_, AppState>,
 ) -> Result<String, String> {
-    let client_guard = state.telegram_client.lock().await;
-    if let Some(ref client) = *client_guard {
-        let client_ref = client.get_client_ref();
-        storage::download_file(client_ref, &file_id, &destination)
-            .await
-            .map_err(|e| e.to_string())
-    } else {
-        Err("Not authenticated".to_string())
-    }
+    let client_ref = {
+        let client_guard = state.telegram_client.lock().await;
+        if let Some(ref client) = *client_guard {
+            client.get_client_ref()
+        } else {
+            return Err("Not authenticated".to_string());
+        }
+    }; // Lock released here
+
+    storage::download_file(client_ref, &file_id, &destination)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn download_thumbnail(
+    file_id: String,
+    destination: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<Option<String>, String> {
+    let client_ref = {
+        let client_guard = state.telegram_client.lock().await;
+        if let Some(ref client) = *client_guard {
+            client.get_client_ref()
+        } else {
+            return Err("Not authenticated".to_string());
+        }
+    }; // Lock released here
+
+    storage::download_thumbnail(client_ref, &file_id, &destination)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -213,15 +245,18 @@ async fn delete_file(
     file_id: String,
     state: tauri::State<'_, AppState>,
 ) -> Result<bool, String> {
-    let client_guard = state.telegram_client.lock().await;
-    if let Some(ref client) = *client_guard {
-        let client_ref = client.get_client_ref();
-        storage::delete_file(client_ref, &file_id)
-            .await
-            .map_err(|e| e.to_string())
-    } else {
-        Err("Not authenticated".to_string())
-    }
+    let client_ref = {
+        let client_guard = state.telegram_client.lock().await;
+        if let Some(ref client) = *client_guard {
+            client.get_client_ref()
+        } else {
+            return Err("Not authenticated".to_string());
+        }
+    }; // Lock released here
+
+    storage::delete_file(client_ref, &file_id)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -309,6 +344,7 @@ fn main() {
             telegram_check_auth,
             upload_file,
             download_file,
+            download_thumbnail,
             list_files,
             create_folder,
             delete_file,

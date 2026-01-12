@@ -20,7 +20,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
           <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
             <Cloud className="w-4 h-4 text-white" />
           </div>
-          <span className="font-semibold text-base text-gray-900 tracking-tight">UnlimCloud</span>
+          <span className="font-semibold text-base text-gray-900 tracking-tight">T-Vault</span>
         </div>
       </div>
 

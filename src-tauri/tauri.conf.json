@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "UnlimCloud",
+    "productName": "T-Vault",
     "version": "1.0.1"
   },
   "tauri": {
@@ -40,12 +40,17 @@
       },
       "path": {
         "all": true
+      },
+      "protocol": {
+        "all": true,
+        "asset": true,
+        "assetScope": ["**"]
       }
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.unlimcloud.app",
+      "identifier": "com.tvault.app",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -61,7 +66,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "UnlimCloud",
+        "title": "T-Vault",
         "width": 1200,
         "height": 800,
         "minWidth": 800,

@@ -11,7 +11,7 @@ pub struct ApiKeys {
 
 impl ApiKeys {
     fn get_config_path() -> Result<PathBuf> {
-        let data_dir = ProjectDirs::from("com", "unlimcloud", "unlim-cloud")
+        let data_dir = ProjectDirs::from("com", "tvault", "t-vault")
             .ok_or_else(|| anyhow::anyhow!("Failed to get data directory"))?
             .data_dir()
             .to_path_buf();

@@ -1,13 +1,13 @@
-# 🎉 UnlimCloud macOS App - Project Complete!
+# 🎉 T-Vault macOS App - Project Complete!
 
 ## ✅ What's Been Built
 
-I've created a **complete, production-ready macOS desktop application** for UnlimCloud from scratch! Here's everything that's included:
+I've created a **complete, production-ready macOS desktop application** for T-Vault from scratch! Here's everything that's included:
 
 ## 📁 Project Structure
 
 ```
-unLim/
+t-vault/
 ├── src/                              # React Frontend
 │   ├── components/
 │   │   ├── App.tsx                  # Main application
@@ -18,7 +18,7 @@ unLim/
 │   │   ├── Settings.tsx             # App settings
 │   │   ├── Sidebar.tsx              # Navigation sidebar
 │   │   ├── LoadingScreen.tsx        # Loading screen
-│   │   └── StorageStats.tsx         # Storage statistics
+│   │   ├── StorageStats.tsx         # Storage statistics
 │   ├── main.tsx                     # Entry point
 │   ├── styles.css                   # Global styles (Tailwind)
 │   └── vite-env.d.ts               # TypeScript definitions
@@ -199,7 +199,7 @@ yarn tauri:build
 ## 🔐 Security Notes
 
 1. **API Credentials**: Keep your `api_id` and `api_hash` secret
-2. **Session Files**: Don't share `unlim_session.bin`
+2. **Session Files**: Don't share `tvault_session.bin`
 3. **Encryption**: Enable for sensitive files
 4. **Backup**: Don't rely solely on this for backups
 

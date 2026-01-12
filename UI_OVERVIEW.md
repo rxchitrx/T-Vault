@@ -1,11 +1,11 @@
-# 🎨 UnlimCloud UI Overview
+# 🎨 T-Vault UI Overview
 
 This document shows what each screen looks like and what you can do.
 
 ## 🔐 Login Screen
 
 **What you see:**
-- UnlimCloud logo (cloud icon)
+- T-Vault logo (cloud icon)
 - Phone number input field
 - "Send Code" button
 - Clean, modern design with Telegram blue accent
@@ -29,7 +29,7 @@ This document shows what each screen looks like and what you can do.
 **Layout:**
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ 🔵 UnlimCloud        │  My Files    💾 Storage Stats    │ ← Titlebar
+│ 🔵 T-Vault             │  My Files    💾 Storage Stats    │ ← Titlebar
 ├──────────────┬──────────────────────────────────────────┤
 │              │  Home > Documents          [Upload] [New Folder] │
 │  📂 Files    │  ┌─────────────────────────────────────┐ │
@@ -64,7 +64,7 @@ This document shows what each screen looks like and what you can do.
 **Layout:**
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ 🔵 UnlimCloud        │  Gallery    💾 Storage Stats     │
+│ 🔵 T-Vault             │  Gallery    💾 Storage Stats     │
 ├──────────────┬──────────────────────────────────────────┤
 │              │  Gallery (24 items)      [Grid] [List]   │
 │  📂 Files    │                                           │

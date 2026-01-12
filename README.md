@@ -1,8 +1,8 @@
-# UnlimCloud Desktop App 🚀
+# T-Vault Desktop App 🚀
 
 > Unlimited cloud storage powered by Telegram - Built for macOS
 
-![UnlimCloud](https://img.shields.io/badge/Platform-macOS-blue?style=flat-square)
+![T-Vault](https://img.shields.io/badge/Platform-macOS-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Tauri](https://img.shields.io/badge/Built%20with-Tauri-orange?style=flat-square)
 
@@ -37,8 +37,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/inulute/unlim-cloud.git
-cd unlim-cloud
+git clone https://github.com/inulute/t-vault.git
+cd t-vault
 ```
 
 ### 2. Install Dependencies
@@ -85,7 +85,7 @@ The built app will be in `src-tauri/target/release/bundle/`.
 
 ## 🎯 How It Works
 
-UnlimCloud uses a clever approach to provide unlimited storage:
+T-Vault uses a clever approach to provide unlimited storage:
 
 1. **Authentication**: You log in with your Telegram account using their official API
 2. **File Upload**: Files are uploaded to your Telegram "Saved Messages"
@@ -96,7 +96,7 @@ UnlimCloud uses a clever approach to provide unlimited storage:
 ## 📱 Project Structure
 
 ```
-unlim-cloud/
+t-vault/
 ├── src/                      # React frontend
 │   ├── components/          # UI components
 │   │   ├── ApiKeyScreen.tsx # API key entry screen
@@ -191,7 +191,7 @@ This application is not affiliated with or endorsed by Telegram. Use at your own
 
 - Built with [Tauri](https://tauri.app/)
 - Powered by [Telegram](https://telegram.org/)
-- Inspired by the original [UnlimCloud](https://github.com/inulute/unlim-cloud)
+- Inspired by the original [T-Vault](https://github.com/inulute/t-vault)
 
 ## 📞 Support
 

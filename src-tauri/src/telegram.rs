@@ -48,7 +48,7 @@ pub struct TelegramClient {
 impl TelegramClient {
     // Validate API credentials by attempting to create a client and make a test call
     pub async fn validate_credentials(api_id: i32, api_hash: &str) -> Result<()> {
-        let data_dir = directories::ProjectDirs::from("com", "unlimcloud", "unlim-cloud")
+        let data_dir = directories::ProjectDirs::from("com", "tvault", "t-vault")
             .ok_or_else(|| anyhow::anyhow!("Failed to get data directory"))?
             .data_dir()
             .to_path_buf();
@@ -113,7 +113,7 @@ impl TelegramClient {
 
     pub async fn new() -> Result<Self> {
         // Use app data directory instead of current directory to avoid triggering Tauri rebuilds
-        let data_dir = directories::ProjectDirs::from("com", "unlimcloud", "unlim-cloud")
+        let data_dir = directories::ProjectDirs::from("com", "tvault", "t-vault")
             .ok_or_else(|| anyhow::anyhow!("Failed to get data directory"))?
             .data_dir()
             .to_path_buf();

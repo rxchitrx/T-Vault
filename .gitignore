@@ -39,9 +39,11 @@ src-tauri/Cargo.lock
 *.session
 *.bin
 unlim_session.bin
+tvault_session.bin
 
 # App data files (stored in app data directory, not in project)
 unlim_metadata.json
+metadata.json
 telegram_session.session
 telegram_session.json
 unlim_storage/

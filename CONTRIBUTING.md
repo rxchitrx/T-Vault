@@ -1,6 +1,6 @@
-# Contributing to UnlimCloud
+# Contributing to T-Vault
 
-Thank you for your interest in contributing to UnlimCloud! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to T-Vault! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -106,7 +106,7 @@ feat: add batch file upload support
 ## Project Structure
 
 ```
-unlim-cloud/
+t-vault/
 ├── src/                 # React frontend
 ├── src-tauri/          # Rust backend
 ├── docs/               # Documentation

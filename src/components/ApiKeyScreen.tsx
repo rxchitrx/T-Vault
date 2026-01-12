@@ -60,7 +60,7 @@ export default function ApiKeyScreen({ onKeysSaved }: ApiKeyScreenProps) {
               <Cloud className="w-7 h-7 text-white animate-bounce-subtle" />
             </div>
             <h1 className="text-3xl font-semibold text-gray-900 mb-2 tracking-tight animate-slideUp" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-              Welcome to UnlimCloud
+              Welcome to T-Vault
             </h1>
             <p className="text-sm text-gray-500 animate-slideUp" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
               First, let's set up your Telegram API credentials
