@@ -1,0 +1,11 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: gray-900 rounded square (matching login screen) -->
+  <rect x="128" y="128" width="768" height="768" rx="128" ry="128" fill="#111827"/>
+  
+  <!-- Cloud icon from lucide-react (properly centered) -->
+  <!-- lucide-react icons use 24x24 viewBox, cloud center is approximately (13.25, 14.5) -->
+  <!-- We want to center it in the 768x768 area (center at 512, 512) -->
+  <g transform="translate(512, 512) scale(18) translate(-13.25, -14.5)">
+    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

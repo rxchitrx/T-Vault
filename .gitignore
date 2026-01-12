@@ -1,0 +1,77 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+dist-ssr
+build
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swo
+*~
+
+# Tauri
+src-tauri/target
+src-tauri/Cargo.lock
+
+# Session files and app data
+*.session
+*.bin
+unlim_session.bin
+
+# App data files (stored in app data directory, not in project)
+unlim_metadata.json
+telegram_session.session
+telegram_session.json
+unlim_storage/
+api_keys.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.backup
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.cursor/
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
