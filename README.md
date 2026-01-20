@@ -2,7 +2,7 @@
 
 > Unlimited cloud storage powered by Telegram - Built for macOS
 
-<video src="https://github.com/rxchitrx/T-Vault/raw/main/Media/T-vault.mp4" width="100%" controls></video>
+https://github.com/rxchitrx/T-Vault/raw/main/Media/T-vault.mp4
 
 ![T-Vault](https://img.shields.io/badge/Platform-macOS-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
