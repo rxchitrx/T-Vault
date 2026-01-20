@@ -24,12 +24,14 @@ chrono = "0.4"
 anyhow = "1.0"
 mime_guess = "2.0"
 dotenv = "0.15"
-grammers-client = "0.8"
-grammers-session = "0.8"
-grammers-mtsender = "0.8"
+grammers-client = { git = "https://github.com/Lonami/grammers", branch = "master" }
+grammers-session = { git = "https://github.com/Lonami/grammers", branch = "master" }
+grammers-mtsender = { git = "https://github.com/Lonami/grammers", branch = "master" }
+grammers-tl-types = { git = "https://github.com/Lonami/grammers", branch = "master" }
 futures = "0.3"
 tokio-stream = "0.1"
 lazy_static = "1.4"
+regex = "1.10"
 
 [features]
 default = ["custom-protocol"]

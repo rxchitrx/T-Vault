@@ -2,6 +2,8 @@
 
 > Unlimited cloud storage powered by Telegram - Built for macOS
 
+<video src="Media/T-vault.mp4" width="100%" controls></video>
+
 ![T-Vault](https://img.shields.io/badge/Platform-macOS-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Tauri](https://img.shields.io/badge/Built%20with-Tauri-orange?style=flat-square)
@@ -25,159 +27,121 @@ This application uses Telegram as a storage backend by uploading files to your T
 - Telegram could change their policies at any time
 - **Not recommended as your only backup solution**
 
-## 📋 Prerequisites
+## 🚀 Getting Started
 
-Before you begin, ensure you have the following installed:
+### 1. Download
+Download the latest `.dmg` file from the [Releases](../../releases) page.
 
-- **Node.js** (v20 or higher)
-- **Rust** (latest stable version)
+### 2. Install
+Open the `.dmg` file and drag **T-Vault** to your **Applications** folder.
 
-## 🛠️ Quick Start
+### 3. Setup API Credentials
+To use T-Vault, you need your own Telegram API keys:
 
-### 1. Clone the Repository
+1. Go to [my.telegram.org](https://my.telegram.org) and log in.
+2. Click on **API development tools**.
+3. Create a new application (you can use any name).
+4. Copy your `App api_id` and `App api_hash`.
+5. Open T-Vault and enter these credentials in the setup screen.
 
-```bash
-git clone https://github.com/inulute/t-vault.git
-cd t-vault
-```
+![T-Vault Setup](Media/T-vault.png)
 
-### 2. Install Dependencies
+### 4. Login
+After configuring your API keys, log in with your Telegram phone number and enter the verification code sent to your Telegram app.
 
-```bash
-npm install
-```
+## 📸 Gallery
 
-### 3. Get Your Telegram API Credentials
+Experience your media like never before with our native gallery view. T-Vault automatically categorizes your photos and videos, providing a seamless browsing experience directly from your Telegram storage.
 
-1. Go to [https://my.telegram.org](https://my.telegram.org)
-2. Log in with your phone number
-3. Click "API development tools"
-4. Create a new application
-5. Copy your `api_id` and `api_hash`
+*(Check out the video at the top for a full demo of the gallery in action!)*
 
-### 4. Run the Application
+## 🙏 Requests
 
-```bash
-npm run tauri:dev
-```
-
-### 5. First-Time Setup
-
-When you first launch the app:
-
-1. **Enter API Credentials**: The app will prompt you to enter your Telegram API ID and API Hash
-   - The app validates your credentials before saving
-   - Your credentials are stored securely on your device
-
-2. **Login**: After saving your API keys, log in with your Telegram phone number
-   - Enter your phone number with country code (e.g., `+1234567890`)
-   - Enter the verification code sent to your Telegram app
-
-3. **Start Using**: You're ready to upload and manage files!
-
-## 🏗️ Building for Production
-
-```bash
-npm run tauri:build
-```
-
-The built app will be in `src-tauri/target/release/bundle/`.
+Have a feature in mind or found a bug? We'd love to hear from you!
+- **Feature Requests**: Open an issue with the `enhancement` label.
+- **Bug Reports**: Open an issue with the `bug` label.
+- **General Feedback**: Join our GitHub Discussions.
 
 ## 🎯 How It Works
 
 T-Vault uses a clever approach to provide unlimited storage:
 
-1. **Authentication**: You log in with your Telegram account using their official API
-2. **File Upload**: Files are uploaded to your Telegram "Saved Messages"
-3. **Metadata Storage**: A JSON structure tracks your folder organization
-4. **Retrieval**: Files are downloaded from Telegram when needed
-5. **Sync**: Files are accessible from any device with Telegram
-
-## 📱 Project Structure
-
-```
-t-vault/
-├── src/                      # React frontend
-│   ├── components/          # UI components
-│   │   ├── ApiKeyScreen.tsx # API key entry screen
-│   │   ├── LoginScreen.tsx  # Telegram login
-│   │   ├── Dashboard.tsx    # Main dashboard
-│   │   └── ...             # Other components
-│   ├── App.tsx             # Main app component
-│   ├── main.tsx            # Entry point
-│   └── styles.css          # Global styles
-├── src-tauri/               # Rust backend
-│   ├── src/
-│   │   ├── main.rs         # Tauri main
-│   │   ├── telegram.rs     # Telegram API integration
-│   │   ├── storage.rs      # File storage logic
-│   │   ├── api_keys.rs     # API key management
-│   │   └── encryption.rs   # Encryption utilities (unused)
-│   ├── Cargo.toml          # Rust dependencies
-│   └── tauri.conf.json     # Tauri configuration
-├── scripts/                 # Build scripts
-├── package.json            # Node dependencies
-└── README.md               # This file
-```
+1. **Authentication**: You log in with your Telegram account using their official API.
+2. **File Upload**: Files are uploaded to your Telegram "Saved Messages".
+3. **Metadata Storage**: A JSON structure tracks your folder organization.
+4. **Retrieval**: Files are downloaded from Telegram when needed.
+5. **Sync**: Files are accessible from any device with Telegram.
 
 ## 🔐 Security & Privacy
 
-- **Secure Storage**: API keys are stored in the app's data directory (not in the project)
-- **No Hardcoded Credentials**: All credentials are user-provided
-- **Secure Sessions**: Telegram sessions are stored locally
-- **No Third Parties**: Direct communication with Telegram's API
-- **Your Data**: Everything stays in your Telegram account
+- **Secure Storage**: API keys are stored in the app's data directory (not in the project).
+- **No Hardcoded Credentials**: All credentials are user-provided.
+- **Secure Sessions**: Telegram sessions are stored locally.
+- **No Third Parties**: Direct communication with Telegram's API.
+- **Your Data**: Everything stays in your Telegram account.
 
 ## 🐛 Troubleshooting
 
 ### "Invalid API credentials" error
-
-- Double-check your API ID and API Hash from [my.telegram.org](https://my.telegram.org)
-- Make sure there are no extra spaces or characters
-- Try getting new API credentials
+- Double-check your API ID and API Hash from [my.telegram.org](https://my.telegram.org).
+- Make sure there are no extra spaces or characters.
 
 ### "Failed to connect to Telegram"
-
-- Check your internet connection
-- Verify your API credentials are correct
-- Ensure you're not behind a restrictive firewall
+- Check your internet connection.
+- Ensure you're not behind a restrictive firewall.
 
 ### "Session expired"
+- The app will prompt you to log in again. Your files remain safe in Telegram.
 
-- The app will prompt you to log in again
-- Your files remain safe in Telegram
+## 🛠️ Development
 
-### Build errors
+If you'd like to build T-Vault from source or contribute to the project:
 
+### Prerequisites
+- **Node.js** (v20 or higher)
+- **Rust** (latest stable version)
+
+### Build Instructions
 ```bash
-# Clean and rebuild
-rm -rf node_modules src-tauri/target
-yarn install
-cargo clean
-yarn tauri:dev
+# Clone the repository
+git clone https://github.com/inulute/t-vault.git
+cd t-vault
+
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run tauri:dev
+
+# Build for production
+npm run tauri:build
+```
+
+### Project Structure
+```
+t-vault/
+├── src/                      # React frontend
+├── src-tauri/               # Rust backend
+│   ├── src/
+│   │   ├── telegram.rs     # Telegram API integration
+│   │   └── storage.rs      # File storage logic
+└── ...
 ```
 
 ## 🗺️ Roadmap
 
 - [x] macOS Desktop App
 - [x] In-app API key configuration
-- [x] API key validation
 - [ ] iOS Companion App
 - [ ] Real-time sync between devices
 - [ ] File sharing with other users
 - [ ] Advanced search capabilities
-- [ ] Video/audio preview
-- [ ] Batch operations
+
+*If we receive enough interest and requests, we plan to expand T-Vault with official iOS and Windows applications!*
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## 📄 License
 
@@ -185,21 +149,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## ⚠️ Disclaimer
 
-This application is not affiliated with or endorsed by Telegram. Use at your own risk. The developers are not responsible for any account restrictions or data loss that may occur from using this application.
+This application is not affiliated with or endorsed by Telegram. Use at your own risk.
 
 ## 💖 Acknowledgments
 
 - Built with [Tauri](https://tauri.app/)
 - Powered by [Telegram](https://telegram.org/)
-- Inspired by the original [T-Vault](https://github.com/inulute/t-vault)
+- Inspired by [Unlim](https://github.com/inulute/unlim-cloud)
 
 ## 📞 Support
 
-If you encounter any issues or have questions:
-
-- Open an issue on GitHub
-- Check existing issues for solutions
-- Read the troubleshooting section above
+If you encounter any issues, please open an issue on GitHub.
 
 ---
 

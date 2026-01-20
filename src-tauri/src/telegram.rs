@@ -1,4 +1,5 @@
-use grammers_client::{Client, SignInError};
+use grammers_client::{Client, SignInError, client::LoginToken};
+use grammers_client::peer::{User, Peer};
 use grammers_session::storages::SqliteSession;
 use grammers_mtsender::{SenderPool, SenderPoolHandle};
 use anyhow::{Result, Context};
@@ -38,7 +39,7 @@ pub struct TelegramClient {
     // Kept for potential future use in connection management
     #[allow(dead_code)]
     pool_handle: Arc<Mutex<Option<SenderPoolHandle>>>,
-    login_token: Arc<Mutex<Option<grammers_client::types::LoginToken>>>,
+    login_token: Arc<Mutex<Option<LoginToken>>>,
     // Kept for reference, may be used for session management in future
     #[allow(dead_code)]
     session_file: PathBuf,
@@ -186,7 +187,7 @@ impl TelegramClient {
     pub async fn verify_code(&mut self, _phone: &str, code: &str) -> Result<()> {
         // Get token first
         let token = {
-            let mut token_guard = self.login_token.lock().await;
+            let mut token_guard: tokio::sync::MutexGuard<'_, Option<LoginToken>> = self.login_token.lock().await;
             token_guard.take()
         };
         
@@ -240,12 +241,154 @@ impl TelegramClient {
 
     // Get self user - available for future features (e.g., displaying user info in UI)
     #[allow(dead_code)]
-    pub async fn get_me(&self) -> Result<grammers_client::types::User> {
+    pub async fn get_me(&self) -> Result<User> {
         let client_guard = self.client.lock().await;
         if let Some(ref client) = *client_guard {
             client.get_me().await.map_err(|e| anyhow::anyhow!("Failed to get user: {:?}", e))
         } else {
             Err(anyhow::anyhow!("Client not initialized"))
+        }
+    }
+}
+
+// Channel management functions for folder-based storage
+/// Create a private Telegram channel for a folder
+pub async fn create_folder_channel(
+    client: &Client,
+    title: &str,
+    description: &str,
+) -> Result<(i64, String)> {
+    use grammers_tl_types as tl;
+
+    // Create channel using raw TL request
+    let request = tl::functions::channels::CreateChannel {
+        broadcast: true,    // Private channel (not group)
+        megagroup: false,   // Not a supergroup
+        title: title.to_string(),
+        about: description.to_string(),
+        geo_point: None,
+        address: None,
+        for_import: false,
+        forum: false,
+        ttl_period: None,
+    };
+    
+    let updates = client.invoke(&request).await
+        .map_err(|e| anyhow::anyhow!("Failed to create channel: {:?}", e))?;
+    
+    // Extract channel from updates
+    let channel = match updates {
+        tl::enums::Updates::Updates(u) => {
+            // Find the channel in chats
+            u.chats.into_iter()
+                .find_map(|chat| match chat {
+                    tl::enums::Chat::Channel(c) => Some(c),
+                    _ => None,
+                })
+                .ok_or_else(|| anyhow::anyhow!("Channel not found in updates"))?
+        }
+        _ => return Err(anyhow::anyhow!("Unexpected updates response")),
+    };
+    
+    let chat_id = channel.id;
+    let chat_title = channel.title.clone();
+    
+    Ok((chat_id, chat_title))
+}
+
+/// Delete a Telegram channel
+pub async fn delete_channel(
+    client: &Client,
+    chat_id: i64,
+) -> Result<()> {
+    use grammers_tl_types as tl;
+    
+    // First, we need to get the channel's access hash
+    // For now, we'll use the dialogs to find the channel
+    let mut dialogs = client.iter_dialogs();
+    let mut channel_input: Option<tl::enums::InputChannel> = None;
+    
+    while let Some(dialog) = dialogs.next().await
+        .map_err(|e| anyhow::anyhow!("Failed to iterate dialogs: {:?}", e))? {
+        if let Peer::Channel(c) = &dialog.peer {
+            // Compare raw channel id directly
+            if c.raw.id == chat_id {
+                // Found the channel, get its InputChannel
+                channel_input = Some(tl::enums::InputChannel::Channel(tl::types::InputChannel {
+                    channel_id: c.raw.id,
+                    access_hash: c.raw.access_hash.unwrap_or(0),
+                }));
+                break;
+            }
+        }
+    }
+    
+    let channel_input = channel_input
+        .ok_or_else(|| anyhow::anyhow!("Channel not found in dialogs"))?;
+    
+    // Delete the channel
+    let request = tl::functions::channels::DeleteChannel {
+        channel: channel_input,
+    };
+    
+    client.invoke(&request).await
+        .map_err(|e| anyhow::anyhow!("Failed to delete channel: {:?}", e))?;
+    
+    Ok(())
+}
+
+/// Get Peer from chat_id for sending messages
+pub async fn get_chat_peer(
+    client: &Client,
+    chat_id: i64,
+) -> Result<Peer> {
+    println!("Debug: searching for chat_id: {}", chat_id);
+
+    // Search through dialogs but with a reasonable limit to prevent hanging
+    let mut dialogs = client.iter_dialogs();
+    let mut count = 0;
+    const MAX_DIALOGS_TO_SEARCH: usize = 50; // Reduced limit to prevent hanging
+    
+    while let Some(dialog) = dialogs.next().await
+        .map_err(|e| anyhow::anyhow!("Failed to iterate dialogs: {:?}", e))? {
+        
+        count += 1;
+        if count > MAX_DIALOGS_TO_SEARCH {
+            println!("Debug: Stopped search after {} dialogs to prevent hanging", count);
+            break;
+        }
+        
+        if let Peer::Channel(channel) = &dialog.peer {
+            // Compare raw channel id directly
+            if channel.raw.id == chat_id {
+                println!("Debug: Found chat in dialogs at index {}", count);
+                return Ok(dialog.peer.clone());
+            }
+        }
+    }
+    
+    println!("Debug: Chat not found after scanning {} dialogs", count);
+    Err(anyhow::anyhow!("Chat with ID {} not found. The channel may not exist or you may not have access.", chat_id))
+}
+
+/// Test if a client connection is still valid by making a lightweight API call
+pub async fn test_client_connection(client: &Client) -> bool {
+    // Use get_me which is a lightweight API call
+    match tokio::time::timeout(
+        tokio::time::Duration::from_secs(10),
+        client.get_me()
+    ).await {
+        Ok(Ok(_)) => {
+            println!("Client connection verified");
+            true
+        }
+        Ok(Err(e)) => {
+            println!("Client connection test failed: {:?}", e);
+            false
+        }
+        Err(_) => {
+            println!("Client connection test timed out");
+            false
         }
     }
 }

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/tauri';
+import { listen } from '@tauri-apps/api/event';
 import {
   User,
   Bell,
@@ -6,15 +8,64 @@ import {
   Info,
   LogOut,
   ExternalLink,
+  RefreshCcw,
+  Database,
 } from 'lucide-react';
+import { useToast } from './ToastContainer';
 
 export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationProgress, setMigrationProgress] = useState<{current: number, total: number, file: string, progress: number} | null>(null);
+  const toast = useToast();
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen('migration-progress', (event: any) => {
+        setMigrationProgress(event.payload);
+    }).then(u => unlisten = u);
+    
+    return () => { if(unlisten) unlisten(); };
+  }, []);
+
+  const handleMigration = async () => {
+    if (!confirm("This will move existing files from 'Saved Messages' to their respective folder channels. This process involves downloading and re-uploading each file. Continue?")) return;
+    
+    setIsMigrating(true);
+    toast.showInfo('Starting migration...', 3000);
+    
+    try {
+      const report = await invoke<any>('migrate_files_to_folders');
+      toast.showSuccess(`Migration complete! Moved: ${report.migrated}, Failed: ${report.failed}, Skipped: ${report.skipped}`, 5000);
+    } catch (error) {
+      console.error('Migration failed:', error);
+      toast.showError(`Migration failed: ${error}`, 4000);
+    } finally {
+      setIsMigrating(false);
+      setMigrationProgress(null);
+    }
+  };
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    toast.showInfo('Scanning Telegram for your files...', 3000);
+    
+    try {
+      const count = await invoke<number>('sync_metadata');
+      toast.showSuccess(`Sync complete! Found ${count} files.`, 4000);
+    } catch (error) {
+      console.error('Sync failed:', error);
+      toast.showError(`Sync failed: ${error}`, 4000);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   return (
     <div className="h-full overflow-auto px-8 py-6">
-      <div className="max-w-3xl mx-auto space-y-5">
+      <div className="max-w-3xl mx-auto space-y-5 pb-10">
         {/* Account Section */}
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
@@ -46,7 +97,67 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Maintenance & Sync Section */}
+        <div className="card p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">
+              <Database className="w-4 h-4 text-white" />
+            </div>
+            <h2 className="text-base font-semibold text-gray-900 tracking-tight">Maintenance & Sync</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3">
+              <div className="flex-1 pr-10">
+                <p className="font-medium text-gray-900 text-sm">Rebuild Library</p>
+                <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                  Lost your file list after an update or reinstall? This will scan your Telegram Saved Messages and restore all files uploaded with this app.
+                </p>
+              </div>
+              <button 
+                onClick={handleSync}
+                disabled={isSyncing || isMigrating}
+                className={`btn btn-primary text-sm whitespace-nowrap ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <RefreshCcw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Syncing...' : 'Sync Now'}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between py-3 border-t border-gray-100">
+              <div className="flex-1 pr-10">
+                <p className="font-medium text-gray-900 text-sm">Migrate to Folder Channels</p>
+                <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                  Move existing files from "Saved Messages" to dedicated folder channels. This improves organization and enables folder-specific features.
+                </p>
+                {isMigrating && migrationProgress && (
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>Moving: {migrationProgress.file}</span>
+                      <span>{migrationProgress.current}/{migrationProgress.total}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                      <div 
+                        className="bg-gray-900 h-1.5 rounded-full transition-all duration-300"
+                        style={{ width: `${migrationProgress.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button 
+                onClick={handleMigration}
+                disabled={isMigrating || isSyncing}
+                className={`btn btn-secondary text-sm whitespace-nowrap ${isMigrating ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isMigrating ? 'Migrating...' : 'Start Migration'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Security Section */}
+
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">

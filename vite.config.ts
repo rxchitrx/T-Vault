@@ -5,8 +5,10 @@ export default defineConfig({
   plugins: [react()],
   clearScreen: false,
   server: {
-    port: 1420,
-    strictPort: true,
+    // Use a standard Vite port and bind explicitly to IPv4 localhost
+    port: 5173,
+    strictPort: false,
+    host: '127.0.0.1',
   },
   envPrefix: ['VITE_', 'TAURI_'],
   build: {
