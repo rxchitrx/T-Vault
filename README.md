@@ -9,6 +9,27 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Tauri](https://img.shields.io/badge/Built%20with-Tauri-orange?style=flat-square)
 
+## 💡 Who is this for?
+
+- **Indie developers & makers** who want free, reliable storage for project files
+- **Photographers & creators** looking for an alternative to paid cloud storage
+- **Privacy-conscious users** who want control over where their files live
+- **Telegram power users** who already trust Telegram with their data
+- **Anyone tired of paying monthly fees** for cloud storage they rarely use
+
+## 🎯 Why T-Vault?
+
+| Feature | T-Vault | Unlim | Telegram Web | iCloud/Google Drive |
+|---------|---------|-------|--------------|---------------------|
+| Native macOS App | ✅ | ❌ | ❌ | ✅ |
+| Unlimited Storage | ✅ | ✅ | ✅ | ❌ |
+| Gallery View | ✅ | ❌ | ❌ | ✅ |
+| File Folders | ✅ | ❌ | ❌ | ✅ |
+| **Monthly Cost** | **Free** | Free | Free | $2-10+ |
+| Beautiful UI | ✅ | ❌ | ❌ | ✅ |
+
+**What makes T-Vault different:** A native macOS experience that doesn't feel like a web app. Fast uploads, beautiful gallery view, and everything stays in your Telegram account.
+
 ## ✨ Features
 
 - **🔒 Secure Login**: Seamless authentication with your Telegram account
@@ -17,16 +38,6 @@
 - **💾 Unlimited Storage**: Leverage Telegram's infrastructure for unlimited file storage
 - **🎨 Native macOS UI**: Beautiful, modern interface that feels right at home on macOS
 - **🔐 In-App Setup**: Easy API key configuration through the UI
-
-## 🚨 Important Notice
-
-This application uses Telegram as a storage backend by uploading files to your Telegram "Saved Messages". Please note:
-
-- This is a **gray area** usage of Telegram's platform
-- Use responsibly and avoid excessive automated uploads
-- Your files are stored on Telegram's servers
-- Telegram could change their policies at any time
-- **Not recommended as your only backup solution**
 
 ## 🚀 Getting Started
 
@@ -56,13 +67,6 @@ Experience your media like never before with our native gallery view. T-Vault au
 
 *(Check out the video at the top for a full demo of the gallery in action!)*
 
-## 🙏 Requests
-
-Have a feature in mind or found a bug? We'd love to hear from you!
-- **Feature Requests**: Open an issue with the `enhancement` label.
-- **Bug Reports**: Open an issue with the `bug` label.
-- **General Feedback**: Join our GitHub Discussions.
-
 ## 🎯 How It Works
 
 T-Vault uses a clever approach to provide unlimited storage:
@@ -80,6 +84,32 @@ T-Vault uses a clever approach to provide unlimited storage:
 - **Secure Sessions**: Telegram sessions are stored locally.
 - **No Third Parties**: Direct communication with Telegram's API.
 - **Your Data**: Everything stays in your Telegram account.
+
+## ❓ FAQ
+
+### Is this safe to use?
+T-Vault uses Telegram's official API, so your files are as secure as your Telegram account. However, please note:
+- This is a **gray area** usage of Telegram's platform
+- Use responsibly and avoid excessive automated uploads
+- Your files are stored on Telegram's servers
+- Telegram could change their policies at any time
+- **Not recommended as your only backup solution**
+
+### Will Telegram ban me?
+Telegram hasn't taken action against similar tools, but we recommend using T-Vault responsibly. Don't use it for mass automation or spam.
+
+### What happens if Telegram changes their API?
+If Telegram makes breaking changes, we'll update T-Vault accordingly. Your files remain safe in your Telegram account.
+
+### Can I access my files from my phone?
+Yes! Since files are stored in your Telegram "Saved Messages", you can access them from any device with Telegram installed.
+
+## 🙏 Requests
+
+Have a feature in mind or found a bug? We'd love to hear from you!
+- **Feature Requests**: Open an issue with the `enhancement` label.
+- **Bug Reports**: Open an issue with the `bug` label.
+- **General Feedback**: Join our GitHub Discussions.
 
 ## 🐛 Troubleshooting
 
@@ -105,8 +135,8 @@ If you'd like to build T-Vault from source or contribute to the project:
 ### Build Instructions
 ```bash
 # Clone the repository
-git clone https://github.com/inulute/t-vault.git
-cd t-vault
+git clone https://github.com/rxchitrx/T-Vault.git
+cd T-Vault
 
 # Install dependencies
 npm install
