@@ -34,6 +34,7 @@
 
 - **🔒 Secure Login**: Seamless authentication with your Telegram account
 - **📂 File Management**: Upload, download, and organize files in folders
+- **🔄 Database Recovery**: **Rebuild Database** feature restores all your files from Telegram if you reinstall T-Vault or log back in - your files are always safe!
 - **🖼️ Gallery View**: Beautiful gallery for photos and videos
 - **💾 Unlimited Storage**: Leverage Telegram's infrastructure for unlimited file storage
 - **🎨 Native macOS UI**: Beautiful, modern interface that feels right at home on macOS
@@ -118,6 +119,9 @@ If Telegram makes breaking changes, we'll update T-Vault accordingly. Your files
 ### Can I access my files from my phone?
 Yes! Since files are stored in your Telegram "Saved Messages", you can access them from any device with Telegram installed.
 
+### What if I reinstall T-Vault or log out? Will I lose my files?
+**Your files are 100% safe!** All your files remain stored in Telegram's "Saved Messages". When you reinstall T-Vault or log back in, simply go to **Settings → Rebuild Database** and click the button. T-Vault will scan your Telegram messages and restore all your files and folders back into the app. This process may take a few minutes depending on how many files you have.
+
 ## 🙏 Requests
 
 Have a feature in mind or found a bug? We'd love to hear from you!
@@ -141,6 +145,13 @@ Have a feature in mind or found a bug? We'd love to hear from you!
 ### File upload issues
 - **File size limit**: Individual files larger than **2GB** cannot be uploaded due to Telegram's API limitations
 - **Batch upload limit**: Uploading **75+ files at once** may fail due to Telegram's rate limiting. Try uploading in smaller batches (50 files or less)
+
+### "No files showing" after reinstall or login
+If you've reinstalled T-Vault or logged back in and don't see your files:
+- Don't worry! **Your files are safe in Telegram**
+- Go to **Settings** and click **"Rebuild Database"**
+- T-Vault will scan your Telegram "Saved Messages" and restore all files to the app
+- Wait for the process to complete - this may take a few minutes if you have many files
 
 ## 🛠️ Development
 
