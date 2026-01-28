@@ -138,6 +138,10 @@ Have a feature in mind or found a bug? We'd love to hear from you!
 ### "Session expired"
 - The app will prompt you to log in again. Your files remain safe in Telegram.
 
+### File upload issues
+- **File size limit**: Individual files larger than **2GB** cannot be uploaded due to Telegram's API limitations
+- **Batch upload limit**: Uploading **75+ files at once** may fail due to Telegram's rate limiting. Try uploading in smaller batches (50 files or less)
+
 ## 🛠️ Development
 
 If you'd like to build T-Vault from source or contribute to the project:
@@ -177,12 +181,13 @@ t-vault/
 
 - [x] macOS Desktop App
 - [x] In-app API key configuration
+- [ ] **Windows Desktop App** (coming if there's enough interest!)
 - [ ] iOS Companion App
 - [ ] Real-time sync between devices
 - [ ] File sharing with other users
 - [ ] Advanced search capabilities
 
-*If we receive enough interest and requests, we plan to expand T-Vault with official iOS and Windows applications!*
+> **Windows Users**: We're considering building a Windows version of T-Vault! If you're interested, please ⭐ star the repository and let us know in the [issues](../../issues) or [discussions](../../discussions). Your feedback helps us prioritize platforms to support next!
 
 ## 🤝 Contributing
 
