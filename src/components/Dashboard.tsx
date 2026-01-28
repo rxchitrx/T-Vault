@@ -199,10 +199,10 @@ export default function Dashboard() {
   const activeTransfersCount = transferQueue.filter(t => t.status === 'uploading' || t.status === 'downloading' || t.status === 'pending').length;
 
   return (
-    <div className="h-screen w-screen flex bg-white font-sans text-gray-900 selection:bg-gray-900 selection:text-white">
+    <div className="h-screen w-screen flex bg-white dark:bg-dark-bg font-sans text-gray-900 dark:text-dark-text selection:bg-gray-900 dark:bg-white dark:selection:text-gray-900">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      
-      <TransferManager 
+
+      <TransferManager
         queue={transferQueue}
         isOpen={isTransferManagerOpen}
         onClose={() => setIsTransferManagerOpen(false)}
@@ -214,23 +214,23 @@ export default function Dashboard() {
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="titlebar h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8 z-10">
+        <div className="titlebar h-16 bg-white dark:bg-dark-surface border-b border-gray-100 dark:border-dark-border flex items-center justify-between px-8 z-10">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2.5">
-              {currentView === 'files' && <FileText className="w-5 h-5 text-gray-900" />}
-              {currentView === 'gallery' && <LayoutGrid className="w-5 h-5 text-gray-900" />}
-              {currentView === 'settings' && <SettingsIcon className="w-5 h-5 text-gray-900" />}
+              {currentView === 'files' && <FileText className="w-5 h-5 text-gray-900 dark:text-white" />}
+              {currentView === 'gallery' && <LayoutGrid className="w-5 h-5 text-gray-900 dark:text-white" />}
+              {currentView === 'settings' && <SettingsIcon className="w-5 h-5 text-gray-900 dark:text-white" />}
               <h2 className="text-lg font-bold tracking-tight">
                 {currentView === 'files' && 'Files'}
                 {currentView === 'gallery' && 'Gallery'}
                 {currentView === 'settings' && 'Settings'}
               </h2>
             </div>
-            
+
             {activeTransfersCount > 0 && (
-              <button 
+              <button
                 onClick={() => setIsTransferManagerOpen(true)}
-                className="flex items-center space-x-2 px-3 py-1 bg-gray-900 text-white rounded-full text-[10px] font-bold uppercase tracking-widest animate-pulse"
+                className="flex items-center space-x-2 px-3 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full text-[10px] font-bold uppercase tracking-widest animate-pulse"
               >
                 <ArrowUpCircle className="w-3 h-3" />
                 <span>{activeTransfersCount} Processing</span>
@@ -241,19 +241,19 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setIsTransferManagerOpen(true)}
-              className="p-2.5 hover:bg-gray-50 rounded-xl transition-all duration-200 group relative"
+              className="p-2.5 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-all duration-200 group relative"
             >
-              <ArrowUpCircle className={`w-5 h-5 transition-colors ${isTransferManagerOpen ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-600'}`} />
+              <ArrowUpCircle className={`w-5 h-5 transition-colors ${isTransferManagerOpen ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-zinc-600 group-hover:text-gray-600 dark:group-hover:text-zinc-500'}`} />
               {activeTransfersCount > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-gray-900 rounded-full border-2 border-white" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-gray-900 dark:bg-white rounded-full border-2 border-white dark:border-gray-900" />
               )}
             </button>
-            <div className="w-px h-6 bg-gray-100" />
+            <div className="w-px h-6 bg-gray-100 dark:bg-zinc-700" />
             <StorageStats />
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden bg-[#FAFAFA]">
+        <div className="flex-1 overflow-hidden bg-[#FAFAFA] dark:bg-dark-bg">
           {currentView === 'files' && (
             <div className="h-full">
               <FileManager

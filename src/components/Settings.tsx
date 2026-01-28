@@ -10,10 +10,14 @@ import {
   ExternalLink,
   RefreshCcw,
   Database,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useToast } from './ToastContainer';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function Settings() {
+  const { isDark, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -69,17 +73,17 @@ export default function Settings() {
         {/* Account Section */}
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <User className="w-4 h-4 text-white dark:text-gray-900" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900 tracking-tight">Account</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Account</h2>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-border">
               <div>
-                <p className="font-medium text-gray-900 text-sm">Connected Account</p>
-                <p className="text-xs text-gray-400 mt-0.5">Telegram</p>
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Connected Account</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">Telegram</p>
               </div>
               <button className="btn btn-secondary text-sm">
                 <LogOut className="w-4 h-4 mr-2" />
@@ -88,8 +92,8 @@ export default function Settings() {
             </div>
 
             <div className="py-3">
-              <p className="font-medium text-gray-900 mb-2 text-sm">Storage Backend</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Storage Backend</p>
+              <p className="text-xs text-gray-500 dark:text-zinc-500 leading-relaxed">
                 Your files are stored in your Telegram "Saved Messages". Only you can
                 access them.
               </p>
@@ -100,21 +104,21 @@ export default function Settings() {
         {/* Maintenance & Sync Section */}
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">
-              <Database className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <Database className="w-4 h-4 text-white dark:text-gray-900" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900 tracking-tight">Maintenance & Sync</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Maintenance & Sync</h2>
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3">
               <div className="flex-1 pr-10">
-                <p className="font-medium text-gray-900 text-sm">Rebuild Library</p>
-                <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Rebuild Library</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1.5 leading-relaxed">
                   Lost your file list after an update or reinstall? This will scan your Telegram Saved Messages and restore all files uploaded with this app.
                 </p>
               </div>
-              <button 
+              <button
                 onClick={handleSync}
                 disabled={isSyncing || isMigrating}
                 className={`btn btn-primary text-sm whitespace-nowrap ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -124,28 +128,28 @@ export default function Settings() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between py-3 border-t border-gray-100">
+            <div className="flex items-center justify-between py-3 border-t border-gray-100 dark:border-dark-border">
               <div className="flex-1 pr-10">
-                <p className="font-medium text-gray-900 text-sm">Migrate to Folder Channels</p>
-                <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Migrate to Folder Channels</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1.5 leading-relaxed">
                   Move existing files from "Saved Messages" to dedicated folder channels. This improves organization and enables folder-specific features.
                 </p>
                 {isMigrating && migrationProgress && (
                   <div className="mt-3">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-zinc-500 mb-1">
                       <span>Moving: {migrationProgress.file}</span>
                       <span>{migrationProgress.current}/{migrationProgress.total}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
-                      <div 
-                        className="bg-gray-900 h-1.5 rounded-full transition-all duration-300"
+                    <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-1.5">
+                      <div
+                        className="bg-gray-900 dark:bg-white h-1.5 rounded-full transition-all duration-300"
                         style={{ width: `${migrationProgress.progress}%` }}
                       ></div>
                     </div>
                   </div>
                 )}
               </div>
-              <button 
+              <button
                 onClick={handleMigration}
                 disabled={isMigrating || isSyncing}
                 className={`btn btn-secondary text-sm whitespace-nowrap ${isMigrating ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -160,30 +164,30 @@ export default function Settings() {
 
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <Shield className="w-4 h-4 text-white dark:text-gray-900" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900 tracking-tight">Security</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Security</h2>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-border">
               <div className="flex-1">
-                <p className="font-medium text-gray-900 text-sm">End-to-End Encryption</p>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">End-to-End Encryption</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
                   All files are automatically encrypted before uploading
                 </p>
               </div>
               <div className="flex items-center space-x-2">
-                <Shield className="w-4 h-4 text-green-600" />
-                <span className="text-xs font-medium text-green-600">Always On</span>
+                <Shield className="w-4 h-4 text-green-600 dark:text-green-500" />
+                <span className="text-xs font-medium text-green-600 dark:text-green-500">Always On</span>
               </div>
             </div>
 
             <div className="py-3">
-              <div className="p-3 bg-gray-50 border border-gray-100 rounded-xl">
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  <strong className="font-semibold text-gray-900">Direct Access:</strong> Files are uploaded directly to Telegram Saved Messages, allowing you to view and access them from any Telegram client (phone, desktop, web).
+              <div className="p-3 bg-gray-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800 rounded-xl">
+                <p className="text-xs text-gray-600 dark:text-zinc-400 leading-relaxed">
+                  <strong className="font-semibold text-gray-900 dark:text-white">Direct Access:</strong> Files are uploaded directly to Telegram Saved Messages, allowing you to view and access them from any Telegram client (phone, desktop, web).
                 </p>
               </div>
             </div>
@@ -193,17 +197,36 @@ export default function Settings() {
         {/* Preferences Section */}
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">
-              <Bell className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <Bell className="w-4 h-4 text-white dark:text-gray-900" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900 tracking-tight">Preferences</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Preferences</h2>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-border">
               <div className="flex-1">
-                <p className="font-medium text-gray-900 text-sm">Notifications</p>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Dark Mode</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
+                  Switch between light and dark themes
+                </p>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className="relative inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all duration-200"
+              >
+                {isDark ? (
+                  <Sun className="w-5 h-5 text-gray-700 dark:text-yellow-400" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-700" />
+                )}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-border">
+              <div className="flex-1">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Notifications</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
                   Get notified about upload/download progress
                 </p>
               </div>
@@ -214,14 +237,14 @@ export default function Settings() {
                   onChange={(e) => setNotifications(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-900"></div>
+                <div className="w-10 h-5 bg-gray-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 dark:peer-focus:ring-zinc-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-gray-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-zinc-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-white"></div>
               </label>
             </div>
 
             <div className="flex items-center justify-between py-3">
               <div className="flex-1">
-                <p className="font-medium text-gray-900 text-sm">Auto Sync</p>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Auto Sync</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">
                   Automatically sync changes with Telegram
                 </p>
               </div>
@@ -232,7 +255,7 @@ export default function Settings() {
                   onChange={(e) => setAutoSync(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-900"></div>
+                <div className="w-10 h-5 bg-gray-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 dark:peer-focus:ring-zinc-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-gray-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-zinc-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-900 dark:peer-checked:bg-white"></div>
               </label>
             </div>
           </div>
@@ -241,17 +264,17 @@ export default function Settings() {
         {/* About Section */}
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-8 h-8 bg-gray-900 rounded-xl flex items-center justify-center">
-              <Info className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <Info className="w-4 h-4 text-white dark:text-gray-900" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900 tracking-tight">About</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">About</h2>
           </div>
 
           <div className="space-y-4">
-            <div className="py-3 border-b border-gray-100">
-              <p className="text-xs text-gray-500 mb-2 font-medium">Version 1.0.1</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                T-Vault provides unlimited cloud storage by leveraging Telegram as the
+            <div className="py-3 border-b border-gray-100 dark:border-dark-border">
+              <p className="text-xs text-gray-500 dark:text-zinc-500 mb-2 font-medium">Version 1.0.1</p>
+              <p className="text-xs text-gray-500 dark:text-zinc-500 leading-relaxed">
+                T-Vault provides unlimited cloud storage by leveraging Telegram as
                 storage backend.
               </p>
             </div>
@@ -277,8 +300,8 @@ export default function Settings() {
               </a>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-400 leading-relaxed">
+            <div className="pt-4 border-t border-gray-100 dark:border-dark-border">
+              <p className="text-xs text-gray-400 dark:text-zinc-600 leading-relaxed">
                 ⚠️ Important: This application uses Telegram for file storage. Please
                 ensure you comply with Telegram's Terms of Service. Use responsibly and
                 avoid excessive automated uploads that could result in account

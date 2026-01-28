@@ -287,10 +287,10 @@ export default function Gallery({ toast }: GalleryProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Toolbar */}
-      <div className="bg-white border-b border-gray-100 px-8 py-4">
+      <div className="bg-white dark:bg-dark-surface border-b border-gray-100 dark:border-dark-border px-8 py-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900 tracking-tight">
-            Gallery <span className="text-gray-400 font-normal">({files.length})</span>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">
+            Gallery <span className="text-gray-400 dark:text-zinc-600 font-normal">({files.length})</span>
           </h2>
 
           <div className="flex items-center space-x-1.5">
@@ -298,8 +298,8 @@ export default function Gallery({ toast }: GalleryProps) {
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-xl transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-gray-900 text-white shadow-soft'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-soft dark:shadow-soft-dark'
+                  : 'bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-700'
               }`}
             >
               <Grid3x3 className="w-4 h-4" />
@@ -308,8 +308,8 @@ export default function Gallery({ toast }: GalleryProps) {
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-xl transition-all ${
                 viewMode === 'list'
-                  ? 'bg-gray-900 text-white shadow-soft'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-soft dark:shadow-soft-dark'
+                  : 'bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-700'
               }`}
             >
               <List className="w-4 h-4" />
@@ -323,17 +323,17 @@ export default function Gallery({ toast }: GalleryProps) {
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="flex flex-col items-center space-y-3 animate-fadeIn">
-              <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
-              <div className="text-sm text-gray-400 font-medium">Loading gallery...</div>
+              <div className="w-8 h-8 border-2 border-gray-200 dark:border-zinc-700 border-t-gray-900 dark:border-white rounded-full animate-spin"></div>
+              <div className="text-sm text-gray-400 dark:text-zinc-600 font-medium">Loading gallery...</div>
             </div>
           </div>
         ) : files.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 animate-fadeIn">
-            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4 animate-bounce-subtle">
-              <ImageIcon className="w-8 h-8 text-gray-300" />
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-zinc-600 animate-fadeIn">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mb-4 animate-bounce-subtle">
+              <ImageIcon className="w-8 h-8 text-gray-300 dark:text-zinc-600" />
             </div>
-            <p className="text-base font-semibold text-gray-600 mb-1">No media files</p>
-            <p className="text-sm text-gray-400">Upload images or videos to see them here</p>
+            <p className="text-base font-semibold text-gray-600 dark:text-gray-400 mb-1">No media files</p>
+            <p className="text-sm text-gray-400 dark:text-zinc-600">Upload images or videos to see them here</p>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -344,13 +344,13 @@ export default function Gallery({ toast }: GalleryProps) {
                 style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'both' }}
                 onClick={() => setSelectedFile(file)}
               >
-                <div className="relative w-full h-full bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-full bg-gray-100 dark:bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center">
                   {thumbnails[file.id] ? (
                       <img src={thumbnails[file.id]} className="w-full h-full object-cover" />
                   ) : isImage(file.mime_type) ? (
-                    <ImageIcon className="w-10 h-10 text-gray-300" />
+                    <ImageIcon className="w-10 h-10 text-gray-300 dark:text-zinc-600" />
                   ) : (
-                    <Video className="w-10 h-10 text-gray-300" />
+                    <Video className="w-10 h-10 text-gray-300 dark:text-zinc-600" />
                   )}
 
                   {/* Overlay with actions */}
@@ -360,27 +360,27 @@ export default function Gallery({ toast }: GalleryProps) {
                         e.stopPropagation();
                         handleDownload(file.id, file.name);
                       }}
-                      className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-all duration-200 hover:scale-110 active:scale-95 transform"
+                      className="p-2 bg-white dark:bg-gray-900 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-110 active:scale-95 transform"
                     >
-                      <Download className="w-4 h-4 text-gray-700" />
+                      <Download className="w-4 h-4 text-gray-700 dark:text-white" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(file.id, file.name);
                       }}
-                      className="p-2 bg-white rounded-lg hover:bg-red-50 transition-all duration-200 hover:scale-110 active:scale-95 transform"
+                      className="p-2 bg-white dark:bg-gray-900 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 hover:scale-110 active:scale-95 transform"
                     >
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400" />
                     </button>
                   </div>
                 </div>
 
                 <div className="mt-2 px-1">
-                  <p className="text-xs font-medium text-gray-900 truncate">
+                  <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">{formatFileSize(file.size)}</p>
+                  <p className="text-xs text-gray-400 dark:text-zinc-600 mt-0.5">{formatFileSize(file.size)}</p>
                 </div>
               </div>
             ))}
@@ -396,41 +396,41 @@ export default function Gallery({ toast }: GalleryProps) {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3.5">
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 bg-gray-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center overflow-hidden">
                       {thumbnails[file.id] ? (
                           <img src={thumbnails[file.id]} className="w-full h-full object-cover" />
                       ) : isImage(file.mime_type) ? (
-                        <ImageIcon className="w-5 h-5 text-gray-500" />
+                        <ImageIcon className="w-5 h-5 text-gray-500 dark:text-zinc-500" />
                       ) : (
-                        <Video className="w-5 h-5 text-gray-500" />
+                        <Video className="w-5 h-5 text-gray-500 dark:text-zinc-500" />
                       )}
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900 text-sm">{file.name}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <h3 className="font-medium text-gray-900 dark:text-white text-sm">{file.name}</h3>
+                      <p className="text-xs text-gray-400 dark:text-zinc-600 mt-0.5">
                         {formatFileSize(file.size)}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDownload(file.id, file.name);
                       }}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                     >
-                      <Download className="w-4 h-4 text-gray-500" />
+                      <Download className="w-4 h-4 text-gray-500 dark:text-zinc-500" />
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(file.id, file.name);
                       }}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400" />
                     </button>
                   </div>
                 </div>
@@ -446,51 +446,51 @@ export default function Gallery({ toast }: GalleryProps) {
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn p-4"
           onClick={() => setSelectedFile(null)}
         >
-          <div className="max-w-6xl w-full max-h-[90vh] bg-white rounded-2xl shadow-large animate-scaleIn overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="max-w-6xl w-full max-h-[90vh] bg-white dark:bg-dark-surface rounded-2xl shadow-large dark:shadow-large-dark animate-scaleIn overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-base font-semibold text-gray-900 truncate pr-4">{selectedFile.name}</h3>
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-dark-border">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate pr-4">{selectedFile.name}</h3>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleDownload(selectedFile.id, selectedFile.name)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                   title="Download"
                 >
-                  <Download className="w-5 h-5 text-gray-600" />
+                  <Download className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </button>
                 <button
                   onClick={() => setSelectedFile(null)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+                  className="text-gray-400 dark:text-zinc-600 hover:text-gray-600 dark:hover:text-gray-400 transition-colors p-2"
                 >
                   ✕
                 </button>
               </div>
             </div>
-            
+
             {/* Preview Content */}
             <div className="p-6 overflow-auto max-h-[calc(90vh-88px)]">
-              <div className="bg-gray-50 rounded-xl min-h-[400px] flex items-center justify-center">
+              <div className="bg-gray-50 dark:bg-zinc-900/50 rounded-xl min-h-[400px] flex items-center justify-center">
                 {isLoadingPreview ? (
                   <div className="flex flex-col items-center space-y-3">
-                    <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
-                    <div className="text-sm text-gray-400 font-medium">Loading preview...</div>
+                    <div className="w-8 h-8 border-2 border-gray-200 dark:border-zinc-700 border-t-gray-900 dark:border-white rounded-full animate-spin"></div>
+                    <div className="text-sm text-gray-400 dark:text-zinc-600 font-medium">Loading preview...</div>
                   </div>
                 ) : previewUrl ? (
                   isImage(selectedFile.mime_type) ? (
-                    <img 
+                    <img
                       src={previewUrl}
                       alt={selectedFile.name}
                       className="max-w-full max-h-[70vh] object-contain rounded-lg"
                     />
                   ) : (
                     <div className="relative w-full h-full flex flex-col items-center justify-center">
-                        {/* If we have a URL for video, it might be a thumbnail if we implemented that, 
-                            OR the full video. Since we differentiate by mime-type in loadPreview, 
-                            if we are here with a video mime-type and a URL, it's likely the full video 
-                            OR a thumbnail. 
+                        {/* If we have a URL for video, it might be a thumbnail if we implemented that,
+                            OR full video. Since we differentiate by mime-type in loadPreview,
+                            if we are here with a video mime-type and a URL, it's likely full video
+                            OR a thumbnail.
                             Wait, loadPreview logic sets previewUrl to convertFileSrc(thumbResult).
                             If it was a thumbnail, we shouldn't use <video src=thumbnail>.
-                            
+
                             We need a state to know if 'previewUrl' is a thumb or full video.
                             Let's rely on the file extension in the URL or a new state.
                             For simplicity: if it's a video file type, and we have a URL, check if it ends in .jpg/.png
@@ -499,9 +499,9 @@ export default function Gallery({ toast }: GalleryProps) {
                            <div className="relative">
                                <img src={previewUrl} className="max-w-full max-h-[70vh] rounded-lg opacity-80" />
                                <div className="absolute inset-0 flex items-center justify-center">
-                                   <button 
+                                   <button
                                       onClick={() => loadFullVideo(selectedFile)}
-                                      className="bg-gray-900/80 hover:bg-black text-white px-6 py-3 rounded-full flex items-center space-x-2 transition-transform hover:scale-105"
+                                      className="bg-gray-900/80 dark:bg-gray-800/90 hover:bg-black text-white px-6 py-3 rounded-full flex items-center space-x-2 transition-transform hover:scale-105"
                                    >
                                        <Video className="w-6 h-6" />
                                        <span>Play Video</span>
@@ -509,26 +509,26 @@ export default function Gallery({ toast }: GalleryProps) {
                                </div>
                            </div>
                        ) : (
-                        <video 
-                          src={previewUrl}
-                          controls
-                          className="max-w-full max-h-[70vh] rounded-lg"
-                        >
-                          Your browser does not support the video tag.
-                        </video>
+                        <video
+                           src={previewUrl}
+                           controls
+                           className="max-w-full max-h-[70vh] rounded-lg"
+                         >
+                           Your browser does not support the video tag.
+                         </video>
                        )}
                     </div>
                   )
                 ) : (
                   <div className="flex flex-col items-center">
                     {isImage(selectedFile.mime_type) ? (
-                      <ImageIcon className="w-20 h-20 text-gray-300 mb-4" />
+                      <ImageIcon className="w-20 h-20 text-gray-300 dark:text-zinc-600 mb-4" />
                     ) : (
-                      <Video className="w-20 h-20 text-gray-300 mb-4" />
+                      <Video className="w-20 h-20 text-gray-300 dark:text-zinc-600 mb-4" />
                     )}
-                    <p className="text-sm text-gray-400 mb-4">Preview not available</p>
+                    <p className="text-sm text-gray-400 dark:text-zinc-600 mb-4">Preview not available</p>
                     {!isImage(selectedFile.mime_type) && (
-                        <button 
+                        <button
                             onClick={() => loadFullVideo(selectedFile)}
                             className="btn btn-primary"
                         >
@@ -545,7 +545,7 @@ export default function Gallery({ toast }: GalleryProps) {
 
       <DeleteConfirmationModal
         isOpen={!!fileToDelete}
-        fileName={fileToDelete?.name || ''}
+        itemNames={fileToDelete ? [fileToDelete.name] : []}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
         isDeleting={isDeleting}

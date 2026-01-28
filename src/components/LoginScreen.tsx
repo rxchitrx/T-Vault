@@ -61,23 +61,23 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+    <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg">
       <div className="w-full max-w-md mx-4">
         <div className="card p-10 animate-fadeIn">
           {/* Logo */}
           <div className="text-center mb-10 animate-fadeIn">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-900 rounded-2xl mb-5 animate-scaleIn">
-              <Cloud className="w-7 h-7 text-white animate-bounce-subtle" />
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-900 dark:bg-white rounded-2xl mb-5 animate-scaleIn">
+              <Cloud className="w-7 h-7 text-white dark:text-gray-900 animate-bounce-subtle" />
             </div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2 tracking-tight animate-slideUp" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>T-Vault</h1>
-            <p className="text-sm text-gray-500 animate-slideUp" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>Sign in with your Telegram account</p>
+            <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2 tracking-tight animate-slideUp" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>T-Vault</h1>
+            <p className="text-sm text-gray-500 dark:text-zinc-500 animate-slideUp" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>Sign in with your Telegram account</p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start space-x-3 animate-fadeIn">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-red-700">{error}</div>
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl flex items-start space-x-3 animate-fadeIn">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-red-700 dark:text-red-400">{error}</div>
             </div>
           )}
 
@@ -85,11 +85,11 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           {step === 'phone' && (
             <form onSubmit={handleSendCode} className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2.5 uppercase tracking-wide">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2.5 uppercase tracking-wide">
                   Phone Number
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-600" />
                   <input
                     type="tel"
                     value={phone}
@@ -100,7 +100,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                     disabled={isLoading}
                   />
                 </div>
-                <p className="mt-2 text-xs text-gray-400">
+                <p className="mt-2 text-xs text-gray-400 dark:text-zinc-600">
                   Enter your phone number with country code
                 </p>
               </div>
@@ -119,11 +119,11 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           {step === 'code' && (
             <form onSubmit={handleVerifyCode} className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2.5 uppercase tracking-wide">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2.5 uppercase tracking-wide">
                   Verification Code
                 </label>
                 <div className="relative">
-                  <KeyRound className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <KeyRound className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-600" />
                   <input
                     type="text"
                     value={code}
@@ -135,8 +135,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                     autoFocus
                   />
                 </div>
-                <p className="mt-2 text-xs text-gray-400">
-                  Enter the code sent to {phone}
+                <p className="mt-2 text-xs text-gray-400 dark:text-zinc-600">
+                  Enter code sent to {phone}
                 </p>
               </div>
 
@@ -161,8 +161,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           )}
 
           {/* Info */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-400 text-center leading-relaxed">
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-dark-border">
+            <p className="text-xs text-gray-400 dark:text-zinc-600 text-center leading-relaxed">
               By signing in, you agree to use Telegram as your storage backend.
               Your files will be stored in your Telegram account.
             </p>
@@ -171,13 +171,13 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
         {/* Note */}
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-zinc-500">
             Don't have a Telegram account?{' '}
             <a
               href="https://telegram.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-gray-700 hover:text-gray-900 underline underline-offset-2"
+              className="font-medium text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white underline underline-offset-2"
             >
               Create one here
             </a>

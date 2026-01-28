@@ -72,6 +72,9 @@ api_keys.json
 *.ipr
 *.iws
 .cursor/
+.opencode/
+.ralphy/
+.ralphy-worktrees/
 
 # OS
 Thumbs.db

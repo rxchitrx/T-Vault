@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ApiKeyScreen from './components/ApiKeyScreen';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
@@ -52,15 +53,17 @@ function App() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden">
-      {isAuthenticated ? (
-        <Dashboard />
-      ) : apiKeysConfigured ? (
-        <LoginScreen onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        <ApiKeyScreen onKeysSaved={handleKeysSaved} />
-      )}
-    </div>
+    <ThemeProvider>
+      <div className="h-screen w-screen overflow-hidden bg-white dark:bg-dark-bg">
+        {isAuthenticated ? (
+          <Dashboard />
+        ) : apiKeysConfigured ? (
+          <LoginScreen onLoginSuccess={handleLoginSuccess} />
+        ) : (
+          <ApiKeyScreen onKeysSaved={handleKeysSaved} />
+        )}
+      </div>
+    </ThemeProvider>
   );
 }
 

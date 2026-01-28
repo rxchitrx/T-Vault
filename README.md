@@ -38,6 +38,8 @@
 - **💾 Unlimited Storage**: Leverage Telegram's infrastructure for unlimited file storage
 - **🎨 Native macOS UI**: Beautiful, modern interface that feels right at home on macOS
 - **🔐 In-App Setup**: Easy API key configuration through the UI
+- **🖱️ Drag & Drop Upload**: Simply drag and drop files directly into the app to upload
+- **✅ Mass Selection**: Select multiple files at once for batch upload or delete operations
 
 ## 🚀 Getting Started
 
@@ -76,6 +78,18 @@ T-Vault uses a clever approach to provide unlimited storage:
 3. **Metadata Storage**: A JSON structure tracks your folder organization.
 4. **Retrieval**: Files are downloaded from Telegram when needed.
 5. **Sync**: Files are accessible from any device with Telegram.
+
+### New Features
+
+#### Drag & Drop Upload
+Simply drag files from Finder and drop them directly into T-Vault to upload. A visual overlay appears when you drag files over the app, showing you exactly where they'll be uploaded.
+
+#### Mass Selection
+- Click checkboxes to select multiple files
+- Drag to create a selection box (lasso) for quick multi-select
+- Use "Select all" to select all visible files
+- Perform bulk actions: download multiple files at once or delete multiple items
+- Selection toolbar shows count of selected items
 
 ## 🔐 Security & Privacy
 

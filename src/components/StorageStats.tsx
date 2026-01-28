@@ -38,12 +38,12 @@ export default function StorageStats() {
 
   return (
     <div className="flex items-center space-x-4 text-xs">
-      <div className="flex items-center space-x-2 text-gray-500">
+      <div className="flex items-center space-x-2 text-gray-500 dark:text-zinc-500">
         <HardDrive className="w-3.5 h-3.5" />
         <span className="font-medium">{formatSize(stats.total_size)} used</span>
       </div>
-      <div className="w-1 h-1 rounded-full bg-gray-300" />
-      <div className="text-gray-500 font-medium">{stats.total_files} files</div>
+      <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-600" />
+      <div className="text-gray-500 dark:text-zinc-500 font-medium">{stats.total_files} files</div>
     </div>
   );
 }

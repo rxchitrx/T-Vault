@@ -13,14 +13,14 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-gray-100 flex flex-col">
+    <div className="w-64 bg-white dark:bg-dark-surface border-r border-gray-100 dark:border-dark-border flex flex-col">
       {/* Logo */}
-      <div className="titlebar h-14 px-6 flex items-center border-b border-gray-100">
+      <div className="titlebar h-14 px-6 flex items-center border-b border-gray-100 dark:border-dark-border">
         <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
-            <Cloud className="w-4 h-4 text-white" />
+          <div className="w-7 h-7 bg-gray-900 dark:bg-white rounded-lg flex items-center justify-center">
+            <Cloud className="w-4 h-4 text-white dark:text-gray-900" />
           </div>
-          <span className="font-semibold text-base text-gray-900 tracking-tight">T-Vault</span>
+          <span className="font-semibold text-base text-gray-900 dark:text-white tracking-tight">T-Vault</span>
         </div>
       </div>
 
@@ -36,15 +36,15 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
               onClick={() => onViewChange(item.id as any)}
               className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden group ${
                 isActive
-                  ? 'bg-gray-900 text-white shadow-soft transform scale-[1.02]'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1'
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-soft dark:shadow-soft-dark transform scale-[1.02]'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white hover:translate-x-1'
               }`}
             >
               {isActive && (
                 <div className="absolute inset-0 shimmer-effect" />
               )}
-              <Icon className={`w-4 h-4 transition-transform duration-300 relative z-10 ${isActive ? 'text-white scale-110' : 'text-gray-500 group-hover:scale-110'}`} />
-              <span className={`text-sm font-medium transition-all duration-300 relative z-10 ${isActive ? 'text-white' : 'text-gray-700'}`}>
+              <Icon className={`w-4 h-4 transition-transform duration-300 relative z-10 ${isActive ? 'text-white dark:text-gray-900 scale-110' : 'text-gray-500 dark:text-zinc-500 group-hover:scale-110'}`} />
+              <span className={`text-sm font-medium transition-all duration-300 relative z-10 ${isActive ? 'text-white dark:text-gray-900' : 'text-gray-700 dark:text-gray-400'}`}>
                 {item.label}
               </span>
             </button>
@@ -53,8 +53,8 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-5 border-t border-gray-100">
-        <div className="text-xs text-gray-400 text-center space-y-0.5">
+      <div className="p-5 border-t border-gray-100 dark:border-dark-border">
+        <div className="text-xs text-gray-400 dark:text-zinc-600 text-center space-y-0.5">
           <p className="font-medium">Powered by Telegram</p>
           <p>Unlimited Storage</p>
         </div>

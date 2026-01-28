@@ -72,7 +72,8 @@
         "minWidth": 800,
         "minHeight": 600,
         "titleBarStyle": "Transparent",
-        "hiddenTitle": true
+        "hiddenTitle": true,
+        "fileDropEnabled": true
       }
     ]
   }

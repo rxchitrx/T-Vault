@@ -4,10 +4,10 @@
 
 @layer base {
   * {
-    border-color: theme('colors.gray.100');
+    @apply dark:border-zinc-800;
   }
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-white text-gray-900 dark:bg-dark-bg dark:text-dark-text;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -16,35 +16,35 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-2xl shadow-soft border border-gray-100;
+    @apply bg-white dark:bg-dark-surface rounded-2xl shadow-soft dark:shadow-soft-dark border border-gray-100 dark:border-dark-border;
   }
-  
+
   .card-hover {
-    @apply card transition-all duration-300 hover:shadow-medium hover:border-gray-200 hover:-translate-y-0.5;
+    @apply card transition-all duration-300 hover:shadow-medium dark:hover:shadow-medium-dark hover:border-gray-200 dark:hover:border-zinc-700 hover:-translate-y-0.5;
   }
-  
+
   .btn {
-    @apply px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2;
+    @apply px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900;
   }
-  
+
   .btn-primary {
-    @apply bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.98] focus:ring-gray-300;
+    @apply bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.98] focus:ring-gray-300 dark:focus:ring-gray-600;
   }
-  
+
   .btn-secondary {
-    @apply bg-gray-50 text-gray-700 hover:bg-gray-100 active:scale-[0.98] border border-gray-200 focus:ring-gray-300;
+    @apply bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-zinc-700 active:scale-[0.98] border border-gray-200 dark:border-zinc-700 focus:ring-gray-300 dark:focus:ring-zinc-600;
   }
-  
+
   .btn-ghost {
-    @apply bg-transparent text-gray-600 hover:bg-gray-50 active:scale-[0.98] focus:ring-gray-300;
+    @apply bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.98] focus:ring-gray-300 dark:focus:ring-zinc-600;
   }
-  
+
   .input {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 focus:ring-offset-0 outline-none transition-all text-sm;
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-dark-text placeholder:text-gray-400 dark:placeholder:text-zinc-600 focus:border-gray-400 dark:focus:border-zinc-500 focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 focus:ring-offset-0 outline-none transition-all text-sm;
   }
-  
+
   .input-error {
-    @apply border-red-300 focus:border-red-400 focus:ring-red-200;
+    @apply border-red-300 dark:border-red-900 focus:border-red-400 dark:focus:border-red-800 focus:ring-red-200 dark:focus:ring-red-900/30;
   }
 }
 
@@ -63,8 +63,16 @@
   border-radius: 3px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* macOS window drag region */
@@ -173,6 +181,15 @@
   background-size: 1000px 100%;
 }
 
+.dark .animate-shimmer {
+  background: linear-gradient(
+    to right,
+    #27272a 0%,
+    #3f3f46 50%,
+    #27272a 100%
+  );
+}
+
 @keyframes bounce {
   0%, 100% {
     transform: translateY(0);
@@ -215,6 +232,15 @@
     #f3f4f6 80px
   );
   background-size: 200px 100%;
+}
+
+.dark .animate-skeleton {
+  background: linear-gradient(
+    90deg,
+    #27272a 0px,
+    #3f3f46 40px,
+    #27272a 80px
+  );
 }
 
 @keyframes shimmer {
@@ -289,6 +315,19 @@
   }
   50% {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.dark .animate-glow {
+  animation: glow-dark 2s ease-in-out infinite;
+}
+
+@keyframes glow-dark {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
   }
 }
 
