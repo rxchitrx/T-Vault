@@ -25,16 +25,22 @@ export default function DownloadDialog() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
+    console.log('📥 [DLG] DownloadDialog: Setting up event listener for fuse-download-request');
     const unlisten = listen<FileDownloadInfo[]>('fuse-download-request', (event) => {
       const requestedFiles = event.payload;
-      console.log('FUSE download request:', requestedFiles);
+      console.log('📥 [DLG] Received fuse-download-request event:', requestedFiles);
+      console.log('📥 [DLG]   Files:', requestedFiles.map(f => `${f.file_name} (${formatSize(f.file_size)})`).join(', '));
       setFiles(requestedFiles);
       
       const defaultPath = `${process.env.HOME || '/Users'}/Downloads`;
+      console.log('📥 [DLG] Default downloads path:', defaultPath);
       
       if (requestedFiles.length === 1) {
-        setSavePath(`${defaultPath}/${requestedFiles[0].file_name}`);
+        const path = `${defaultPath}/${requestedFiles[0].file_name}`;
+        console.log('📥 [DLG] Single file mode, setting save path:', path);
+        setSavePath(path);
       } else {
+        console.log('📥 [DLG] Multiple files mode (%d files), setting save mode to "same"', requestedFiles.length);
         setSavePath(defaultPath);
         setSaveMode('same');
       }
@@ -44,75 +50,100 @@ export default function DownloadDialog() {
         paths[f.file_id] = `${defaultPath}/${f.file_name}`;
       });
       setIndividualPaths(paths);
+      console.log('📥 [DLG] Individual paths set:', paths);
       
       setIsOpen(true);
+      console.log('📥 [DLG] Dialog opened');
     });
 
     return () => {
+      console.log('📥 [DLG] Cleaning up event listener');
       unlisten.then(fn => fn());
     };
   }, []);
 
   const handleBrowse = async (fileId?: string) => {
+    console.log('📥 [DLG] handleBrowse called, fileId:', fileId || 'all');
     try {
       const file = fileId ? files.find(f => f.file_id === fileId) : files[0];
+      const currentPath = saveMode === 'individual' && fileId ? individualPaths[fileId] : savePath;
+      console.log('📥 [DLG] Opening native save dialog with path:', currentPath);
+      
       const selected = await invoke<string>('select_save_location', {
-        defaultPath: saveMode === 'individual' && fileId ? individualPaths[fileId] : savePath,
+        defaultPath: currentPath,
         fileName: file?.file_name || '',
       });
       
+      console.log('📥 [DLG] User selected:', selected);
+      
       if (fileId) {
         setIndividualPaths(prev => ({ ...prev, [fileId]: selected }));
+        console.log('📥 [DLG] Updated individual path for', fileId, ':', selected);
       } else {
         setSavePath(selected);
+        console.log('📥 [DLG] Updated save path:', selected);
       }
-    } catch {
-      // User cancelled file dialog
+    } catch (e) {
+      console.log('📥 [DLG] Browse cancelled or failed:', e);
     }
   };
 
   const handleDownload = async () => {
+    console.log('📥 [DLG] handleDownload called');
+    console.log('📥 [DLG]   Files:', files.map(f => f.file_name).join(', '));
+    console.log('📥 [DLG]   Save mode:', saveMode);
+    console.log('📥 [DLG]   Save path:', savePath);
     setIsDownloading(true);
     
     try {
       if (files.length === 1 || saveMode === 'same') {
+        console.log('📥 [DLG] Sending SaveAllTo response, path:', savePath);
         await invoke('fuse_dialog_response', {
           result: { SaveAllTo: { path: savePath } },
         });
+        console.log('📥 [DLG] SaveAllTo response sent successfully');
       } else {
+        console.log('📥 [DLG] Sending individual SaveTo responses...');
         for (const file of files) {
           const path = individualPaths[file.file_id];
           if (path) {
+            console.log('📥 [DLG]   Sending SaveTo for', file.file_name, '->', path);
             await invoke('fuse_dialog_response', {
               result: { SaveTo: { file_id: file.file_id, path } },
             });
           }
         }
+        console.log('📥 [DLG] All SaveTo responses sent');
       }
     } catch (error) {
-      console.error('Download response error:', error);
+      console.error('📥 [DLG] Download response error:', error);
     }
     
     setIsDownloading(false);
     setIsOpen(false);
+    console.log('📥 [DLG] Dialog closed');
   };
 
   const handleCancel = async () => {
+    console.log('📥 [DLG] handleCancel called');
     try {
       if (files.length === 1) {
+        console.log('📥 [DLG] Sending Cancel for single file:', files[0].file_id);
         await invoke('fuse_dialog_response', {
           result: { Cancel: { file_id: files[0].file_id } },
         });
       } else {
+        console.log('📥 [DLG] Sending CancelAll for', files.length, 'files');
         await invoke('fuse_dialog_response', {
           result: 'CancelAll',
         });
       }
     } catch (error) {
-      console.error('Cancel response error:', error);
+      console.error('📥 [DLG] Cancel response error:', error);
     }
     
     setIsOpen(false);
+    console.log('📥 [DLG] Dialog closed (cancelled)');
   };
 
   if (!isOpen) return null;

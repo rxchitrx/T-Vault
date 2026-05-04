@@ -592,11 +592,13 @@ async fn fuse_dialog_response(
     result: fuse::DialogResult,
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
+    println!("👉 [TAURI] fuse_dialog_response called");
     let mount_guard = state.mount_manager.lock();
     if let Some(ref manager) = *mount_guard {
         manager.respond_dialog(result);
         Ok(())
     } else {
+        eprintln!("⚠️  [TAURI] fuse_dialog_response: not mounted");
         Err("Not mounted".to_string())
     }
 }
@@ -630,20 +632,28 @@ async fn get_fuse_downloads(state: tauri::State<'_, AppState>) -> Result<Vec<ser
 
 #[tauri::command]
 async fn select_save_location(default_path: String, file_name: String) -> Result<String, String> {
+    println!("👉 [TAURI] select_save_location: file='{}' default='{}'", file_name, default_path);
     use tauri::api::dialog::blocking::FileDialogBuilder;
     use std::path::PathBuf;
     
     let default = PathBuf::from(&default_path);
     let dir = default.parent().unwrap_or_else(|| std::path::Path::new("/"));
     
+    println!("📥 [TAURI] Opening native save dialog...");
     let result = FileDialogBuilder::new()
         .set_directory(dir)
         .set_file_name(&file_name)
         .save_file();
     
     match result {
-        Some(path) => Ok(path.to_string_lossy().to_string()),
-        None => Err("Cancelled".to_string()),
+        Some(path) => {
+            println!("✅ [TAURI] User selected: '{}'", path.display());
+            Ok(path.to_string_lossy().to_string())
+        }
+        None => {
+            println!("❌ [TAURI] User cancelled save dialog");
+            Err("Cancelled".to_string())
+        }
     }
 }
 
