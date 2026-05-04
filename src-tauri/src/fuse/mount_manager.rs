@@ -168,8 +168,8 @@ impl MountManager {
         #[cfg(target_os = "macos")]
         {
             std::env::var("HOME")
-                .map(|h| PathBuf::from(h).join("T-Vault"))
-                .unwrap_or_else(|_| PathBuf::from("/tmp/T-Vault"))
+                .map(|h| PathBuf::from(h).join(".t-vault-mount"))
+                .unwrap_or_else(|_| PathBuf::from("/tmp/t-vault"))
         }
         
         #[cfg(target_os = "linux")]
@@ -182,6 +182,49 @@ impl MountManager {
         #[cfg(not(any(target_os = "macos", target_os = "linux")))]
         {
             std::env::temp_dir().join("t-vault")
+        }
+    }
+
+    pub fn check_stale_mount(mountpoint: &Path) -> bool {
+        #[cfg(target_os = "macos")]
+        {
+            let output = std::process::Command::new("mount")
+                .output()
+                .ok();
+            
+            if let Some(output) = output {
+                let mount_output = String::from_utf8_lossy(&output.stdout);
+                let mount_str = format!("on {} (", mountpoint.display());
+                return mount_output.contains(&mount_str);
+            }
+        }
+        false
+    }
+
+    pub fn force_unmount(mountpoint: &Path) -> Result<()> {
+        #[cfg(target_os = "macos")]
+        {
+            let output = std::process::Command::new("umount")
+                .arg(mountpoint)
+                .output();
+            
+            match output {
+                Ok(o) if o.status.success() => {
+                    println!("T-Vault FUSE: Force unmounted stale mount at {}", mountpoint.display());
+                    Ok(())
+                }
+                Ok(o) => {
+                    Err(anyhow::anyhow!("umount failed: {}", String::from_utf8_lossy(&o.stderr)))
+                }
+                Err(e) => {
+                    Err(anyhow::anyhow!("Failed to run umount: {}", e))
+                }
+            }
+        }
+        
+        #[cfg(not(target_os = "macos"))]
+        {
+            Ok(())
         }
     }
 

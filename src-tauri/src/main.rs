@@ -523,6 +523,15 @@ async fn mount_volume(
 
     println!("Mount point: {}", mountpoint.display());
 
+    if fuse::MountManager::check_stale_mount(&mountpoint) {
+        println!("Detected stale mount, attempting to clean up...");
+        if let Err(e) = fuse::MountManager::force_unmount(&mountpoint) {
+            println!("Warning: Failed to unmount stale mount: {}", e);
+        } else {
+            std::thread::sleep(std::time::Duration::from_millis(500));
+        }
+    }
+
     let manager = fuse::MountManager::new(client_ref);
     
     println!("Attempting to mount...");
@@ -579,18 +588,30 @@ async fn refresh_mount_metadata(state: tauri::State<'_, AppState>) -> Result<(),
 fn main() {
     init_env();
     
-    // Create a custom runtime with a larger stack size to prevent stack overflow
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
-        .thread_stack_size(4 * 1024 * 1024) // 4MB stack size
+        .thread_stack_size(4 * 1024 * 1024)
         .build()
         .unwrap();
+
+    let mount_manager: std::sync::Arc<parking_lot::Mutex<Option<fuse::MountManager>>> = 
+        std::sync::Arc::new(parking_lot::Mutex::new(None));
+    
+    let mount_manager_clone = mount_manager.clone();
+    ctrlc::set_handler(move || {
+        println!("Received shutdown signal, unmounting FUSE...");
+        let mut guard = mount_manager_clone.lock();
+        if let Some(manager) = guard.take() {
+            let _ = manager.unmount();
+        }
+        std::process::exit(0);
+    }).expect("Error setting Ctrl-C handler");
 
     runtime.block_on(async {
         tauri::Builder::default()
             .manage(AppState {
                 telegram_client: Mutex::new(None),
-                mount_manager: std::sync::Arc::new(parking_lot::Mutex::new(None)),
+                mount_manager: mount_manager.clone(),
             })
             .invoke_handler(tauri::generate_handler![
                 check_api_keys_configured,
@@ -616,6 +637,16 @@ fn main() {
                 get_mount_status,
                 refresh_mount_metadata,
             ])
+            .on_window_event(|event| {
+                if let tauri::WindowEvent::CloseRequested { .. } = event.event() {
+                    println!("Window close requested, unmounting FUSE...");
+                    let state = event.window().state::<AppState>();
+                    let mut guard = state.mount_manager.lock();
+                    if let Some(manager) = guard.take() {
+                        let _ = manager.unmount();
+                    }
+                }
+            })
             .run(tauri::generate_context!())
             .expect("error while running tauri application");
     });
