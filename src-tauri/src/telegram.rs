@@ -63,14 +63,13 @@ impl TelegramClient {
         
         // Create session using SqliteSession for persistence
         let session: Arc<SqliteSession> = Arc::new(
-            SqliteSession::open(temp_session_file.to_str().ok_or_else(|| anyhow::anyhow!("Invalid session path"))?)?
+            SqliteSession::open(temp_session_file.to_str().ok_or_else(|| anyhow::anyhow!("Invalid session path"))?).await?
         );
 
         // Create sender pool with provided API ID
         let pool = SenderPool::new(Arc::clone(&session), api_id);
         
-        // Create client BEFORE moving runner
-        let client = Client::new(&pool);
+        let client = Client::new(pool.handle.clone());
         
         // Now start the pool runner in background
         let runner = pool.runner;
@@ -124,7 +123,7 @@ impl TelegramClient {
         
         // Create session using SqliteSession for persistence
         let session: Arc<SqliteSession> = Arc::new(
-            SqliteSession::open(session_file.to_str().ok_or_else(|| anyhow::anyhow!("Invalid session path"))?)?
+            SqliteSession::open(session_file.to_str().ok_or_else(|| anyhow::anyhow!("Invalid session path"))?).await?
         );
 
         // Get API credentials from stored config or environment
@@ -132,10 +131,9 @@ impl TelegramClient {
         
         // Create sender pool
         let pool = SenderPool::new(Arc::clone(&session), api_id);
-        let pool_handle = pool.handle.clone();
         
-        // Create client BEFORE moving runner
-        let client = Client::new(&pool);
+        let client = Client::new(pool.handle.clone());
+        let pool_handle = pool.handle.thin.clone();
         
         // Now start the pool runner in background
         let runner = pool.runner;

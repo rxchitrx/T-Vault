@@ -5,6 +5,7 @@ mod telegram;
 mod storage;
 mod encryption;
 mod api_keys;
+mod fuse;
 
 use tokio::sync::Mutex;
 use tauri::Manager;
@@ -18,6 +19,7 @@ fn init_env() {
 
 struct AppState {
     telegram_client: Mutex<Option<telegram::TelegramClient>>,
+    mount_manager: std::sync::Arc<parking_lot::Mutex<Option<fuse::MountManager>>>,
 }
 
 #[tauri::command]
@@ -483,6 +485,97 @@ async fn initialize_client(state: tauri::State<'_, AppState>) -> Result<bool, St
     Ok(false)
 }
 
+#[tauri::command]
+async fn mount_volume(
+    mountpoint: Option<String>,
+    state: tauri::State<'_, AppState>,
+) -> Result<String, String> {
+    println!("=== MOUNT_VOLUME CALLED ===");
+    
+    let client_ref = {
+        let client_guard = state.telegram_client.lock().await;
+        println!("Telegram client lock acquired");
+        if let Some(ref client) = *client_guard {
+            println!("Client found, getting ref");
+            client.get_client_ref()
+        } else {
+            println!("ERROR: No client found - not authenticated");
+            return Err("Not authenticated. Please log in first.".to_string());
+        }
+    };
+
+    #[cfg(target_os = "macos")]
+    {
+        let fuse_lib = std::path::Path::new("/usr/local/lib/libfuse3.dylib");
+        let fuse_t_lib = std::path::Path::new("/usr/local/lib/libfuse-t.dylib");
+        
+        println!("Checking FUSE libraries: fuse3={}, fuse-t={}", fuse_lib.exists(), fuse_t_lib.exists());
+        
+        if !fuse_lib.exists() && !fuse_t_lib.exists() {
+            println!("ERROR: FUSE-T not found");
+            return Err("FUSE-T is not installed. Install it with: brew install macos-fuse-t/homebrew-cask/fuse-t".to_string());
+        }
+    }
+
+    let mountpoint = mountpoint
+        .map(|p| std::path::PathBuf::from(p))
+        .unwrap_or_else(|| fuse::MountManager::default_mountpoint());
+
+    println!("Mount point: {}", mountpoint.display());
+
+    let manager = fuse::MountManager::new(client_ref);
+    
+    println!("Attempting to mount...");
+    match manager.mount(&mountpoint) {
+        Ok(msg) => {
+            println!("Mount SUCCESS: {}", msg);
+            let mut mount_guard = state.mount_manager.lock();
+            *mount_guard = Some(manager);
+            Ok(msg)
+        }
+        Err(e) => {
+            println!("Mount ERROR: {}", e);
+            Err(e.to_string())
+        }
+    }
+}
+
+#[tauri::command]
+async fn unmount_volume(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let mut mount_guard = state.mount_manager.lock();
+    
+    if let Some(manager) = mount_guard.take() {
+        manager.unmount().map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err("Not mounted".to_string())
+    }
+}
+
+#[tauri::command]
+async fn get_mount_status(state: tauri::State<'_, AppState>) -> Result<Option<String>, String> {
+    let mount_guard = state.mount_manager.lock();
+    
+    if let Some(ref manager) = *mount_guard {
+        if manager.is_mounted() {
+            return Ok(manager.get_mountpoint().map(|p| p.to_string_lossy().to_string()));
+        }
+    }
+    
+    Ok(None)
+}
+
+#[tauri::command]
+async fn refresh_mount_metadata(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let mount_guard = state.mount_manager.lock();
+    
+    if let Some(ref manager) = *mount_guard {
+        manager.refresh_metadata().map_err(|e| e.to_string())?;
+    }
+    
+    Ok(())
+}
+
 fn main() {
     init_env();
     
@@ -497,6 +590,7 @@ fn main() {
         tauri::Builder::default()
             .manage(AppState {
                 telegram_client: Mutex::new(None),
+                mount_manager: std::sync::Arc::new(parking_lot::Mutex::new(None)),
             })
             .invoke_handler(tauri::generate_handler![
                 check_api_keys_configured,
@@ -517,6 +611,10 @@ fn main() {
                 get_storage_stats,
                 sync_metadata,
                 migrate_files_to_folders,
+                mount_volume,
+                unmount_volume,
+                get_mount_status,
+                refresh_mount_metadata,
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");

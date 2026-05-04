@@ -85,7 +85,7 @@ async fn attempt_upload(
             .document(uploaded_file);
         
         // Get PeerRef from Peer
-        let peer_ref = target_chat.to_ref()
+        let peer_ref = target_chat.to_ref().await
             .ok_or_else(|| anyhow::anyhow!("Failed to get peer reference"))?;
         
         let message: Message = client.send_message(peer_ref, input_message).await
@@ -788,7 +788,7 @@ pub async fn download_file(
     };
     
     // Get PeerRef from Peer
-    let peer_ref = chat.to_ref()
+    let peer_ref = chat.to_ref().await
         .ok_or_else(|| anyhow::anyhow!("Failed to get peer reference"))?;
     
     // Get messages from the appropriate chat
@@ -935,7 +935,7 @@ pub async fn download_thumbnail(
     };
     
     // Get PeerRef from Peer
-    let peer_ref = chat.to_ref()
+    let peer_ref = chat.to_ref().await
         .ok_or_else(|| anyhow::anyhow!("Failed to get peer reference"))?;
     
     let mut messages = client.iter_messages(peer_ref);
@@ -1165,7 +1165,7 @@ pub async fn delete_file(
                 };
                 
                 if let Ok(chat) = chat_result {
-                    if let Some(peer_ref) = chat.to_ref() {
+                    if let Some(peer_ref) = chat.to_ref().await {
                         let message_ids = vec![msg_id];
                         if let Err(e) = client.delete_messages(peer_ref, &message_ids).await {
                             eprintln!("Warning: Failed to delete message from Telegram: {:?}", e);
@@ -1278,7 +1278,7 @@ pub async fn sync_from_telegram(client_ref: Arc<Mutex<Option<Client>>>) -> Resul
     let chat = Peer::User(me);
     
     // Get PeerRef from Peer
-    let peer_ref = chat.to_ref()
+    let peer_ref = chat.to_ref().await
         .ok_or_else(|| anyhow::anyhow!("Failed to get peer reference"))?;
     
     let mut messages = client.iter_messages(peer_ref);

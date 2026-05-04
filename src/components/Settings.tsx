@@ -12,6 +12,8 @@ import {
   Database,
   Moon,
   Sun,
+  HardDrive,
+  FolderOpen,
 } from 'lucide-react';
 import { useToast } from './ToastContainer';
 import { useTheme } from '../contexts/ThemeContext';
@@ -23,6 +25,8 @@ export default function Settings() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationProgress, setMigrationProgress] = useState<{current: number, total: number, file: string, progress: number} | null>(null);
+  const [isMounting, setIsMounting] = useState(false);
+  const [mountStatus, setMountStatus] = useState<string | null>(null);
   const toast = useToast();
 
   useEffect(() => {
@@ -33,6 +37,50 @@ export default function Settings() {
     
     return () => { if(unlisten) unlisten(); };
   }, []);
+
+  useEffect(() => {
+    checkMountStatus();
+  }, []);
+
+  const checkMountStatus = async () => {
+    try {
+      const status = await invoke<string | null>('get_mount_status');
+      setMountStatus(status);
+    } catch (error) {
+      console.error('Failed to check mount status:', error);
+    }
+  };
+
+  const handleMount = async () => {
+    console.log('=== MOUNT BUTTON CLICKED ===');
+    setIsMounting(true);
+    try {
+      console.log('Calling mount_volume Tauri command...');
+      const result = await invoke<string>('mount_volume', { mountpoint: null });
+      console.log('Mount result:', result);
+      toast.showSuccess(result, 4000);
+      await checkMountStatus();
+    } catch (error) {
+      console.error('Mount failed:', error);
+      toast.showError(`Mount failed: ${error}`, 4000);
+    } finally {
+      setIsMounting(false);
+    }
+  };
+
+  const handleUnmount = async () => {
+    setIsMounting(true);
+    try {
+      await invoke('unmount_volume');
+      toast.showSuccess('Volume unmounted successfully', 3000);
+      await checkMountStatus();
+    } catch (error) {
+      console.error('Unmount failed:', error);
+      toast.showError(`Unmount failed: ${error}`, 4000);
+    } finally {
+      setIsMounting(false);
+    }
+  };
 
   const handleMigration = async () => {
     if (!confirm("This will move existing files from 'Saved Messages' to their respective folder channels. This process involves downloading and re-uploading each file. Continue?")) return;
@@ -156,6 +204,62 @@ export default function Settings() {
               >
                 {isMigrating ? 'Migrating...' : 'Start Migration'}
               </button>
+            </div>
+           </div>
+         </div>
+
+        {/* Volume Mount Section */}
+        <div className="card p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <HardDrive className="w-4 h-4 text-white dark:text-gray-900" />
+            </div>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Volume Mount</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3">
+              <div className="flex-1 pr-10">
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Mount as Local Drive</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1.5 leading-relaxed">
+                  Mount your T-Vault storage as a local volume in Finder. Access your files directly from any application.
+                </p>
+                {mountStatus && (
+                  <div className="mt-3 flex items-center space-x-2">
+                    <FolderOpen className="w-4 h-4 text-green-600 dark:text-green-500" />
+                    <span className="text-xs text-green-600 dark:text-green-500 font-medium">
+                      Mounted at {mountStatus}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {mountStatus ? (
+                <button
+                  onClick={handleUnmount}
+                  disabled={isMounting}
+                  className={`btn btn-secondary text-sm whitespace-nowrap ${isMounting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isMounting ? 'Unmounting...' : 'Unmount'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleMount}
+                  disabled={isMounting}
+                  className={`btn btn-primary text-sm whitespace-nowrap ${isMounting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <HardDrive className="w-4 h-4 mr-2" />
+                  {isMounting ? 'Mounting...' : 'Mount Volume'}
+                </button>
+              )}
+            </div>
+
+            <div className="py-3 border-t border-gray-100 dark:border-dark-border">
+              <div className="p-3 bg-gray-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800 rounded-xl">
+                <p className="text-xs text-gray-600 dark:text-zinc-400 leading-relaxed">
+                  <strong className="font-semibold text-gray-900 dark:text-white">Note:</strong> Requires FUSE-T to be installed. 
+                  Install via: <code className="px-1.5 py-0.5 bg-gray-200 dark:bg-zinc-800 rounded text-xs">brew install macos-fuse-t/homebrew-cask/fuse-t</code>
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -33,6 +33,11 @@ tokio-stream = "0.1"
 lazy_static = "1.4"
 regex = "1.10"
 
+fuser = "0.14"
+libc = "0.2"
+lru = "0.12"
+parking_lot = "0.12"
+
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
