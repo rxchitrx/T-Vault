@@ -168,8 +168,8 @@ impl MountManager {
         #[cfg(target_os = "macos")]
         {
             std::env::var("HOME")
-                .map(|h| PathBuf::from(h).join(".t-vault-mount"))
-                .unwrap_or_else(|_| PathBuf::from("/tmp/t-vault"))
+                .map(|h| PathBuf::from(h).join("T-Vault-Drive"))
+                .unwrap_or_else(|_| PathBuf::from("/tmp/T-Vault"))
         }
         
         #[cfg(target_os = "linux")]
