@@ -489,6 +489,7 @@ async fn initialize_client(state: tauri::State<'_, AppState>) -> Result<bool, St
 async fn mount_volume(
     mountpoint: Option<String>,
     state: tauri::State<'_, AppState>,
+    app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     println!("=== MOUNT_VOLUME CALLED ===");
     
@@ -533,6 +534,7 @@ async fn mount_volume(
     }
 
     let manager = fuse::MountManager::new(client_ref);
+    manager.set_app_handle(app_handle);
     
     println!("Attempting to mount...");
     match manager.mount(&mountpoint) {
@@ -583,6 +585,66 @@ async fn refresh_mount_metadata(state: tauri::State<'_, AppState>) -> Result<(),
     }
     
     Ok(())
+}
+
+#[tauri::command]
+async fn fuse_dialog_response(
+    result: fuse::DialogResult,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    let mount_guard = state.mount_manager.lock();
+    if let Some(ref manager) = *mount_guard {
+        manager.respond_dialog(result);
+        Ok(())
+    } else {
+        Err("Not mounted".to_string())
+    }
+}
+
+#[tauri::command]
+async fn get_fuse_downloads(state: tauri::State<'_, AppState>) -> Result<Vec<serde_json::Value>, String> {
+    let mount_guard = state.mount_manager.lock();
+    if let Some(ref manager) = *mount_guard {
+        let tasks = manager.get_download_tasks();
+        Ok(tasks.iter().map(|t| serde_json::json!({
+            "file_id": t.file_id,
+            "file_name": t.file_name,
+            "file_size": t.file_size,
+            "destination": t.destination.to_string_lossy(),
+            "status": match &t.status {
+                fuse::DownloadStatus::Pending => "pending",
+                fuse::DownloadStatus::Downloading { progress } => "downloading",
+                fuse::DownloadStatus::Completed(_) => "completed",
+                fuse::DownloadStatus::Failed(_) => "failed",
+                fuse::DownloadStatus::Cancelled => "cancelled",
+            },
+            "progress": match &t.status {
+                fuse::DownloadStatus::Downloading { progress } => *progress,
+                _ => 0,
+            },
+        })).collect())
+    } else {
+        Ok(vec![])
+    }
+}
+
+#[tauri::command]
+async fn select_save_location(default_path: String, file_name: String) -> Result<String, String> {
+    use tauri::api::dialog::blocking::FileDialogBuilder;
+    use std::path::PathBuf;
+    
+    let default = PathBuf::from(&default_path);
+    let dir = default.parent().unwrap_or_else(|| std::path::Path::new("/"));
+    
+    let result = FileDialogBuilder::new()
+        .set_directory(dir)
+        .set_file_name(&file_name)
+        .save_file();
+    
+    match result {
+        Some(path) => Ok(path.to_string_lossy().to_string()),
+        None => Err("Cancelled".to_string()),
+    }
 }
 
 fn main() {
@@ -636,6 +698,9 @@ fn main() {
                 unmount_volume,
                 get_mount_status,
                 refresh_mount_metadata,
+                fuse_dialog_response,
+                get_fuse_downloads,
+                select_save_location,
             ])
             .on_window_event(|event| {
                 if let tauri::WindowEvent::CloseRequested { .. } = event.event() {

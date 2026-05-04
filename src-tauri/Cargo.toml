@@ -38,6 +38,7 @@ libc = "0.2"
 lru = "0.12"
 parking_lot = "0.12"
 ctrlc = "3.4"
+crossbeam-channel = "0.5"
 
 [features]
 default = ["custom-protocol"]

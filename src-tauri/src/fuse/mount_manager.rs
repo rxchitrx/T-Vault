@@ -6,11 +6,15 @@ use tokio::sync::Mutex as AsyncMutex;
 use anyhow::Result;
 
 use super::filesystem::TVaultFS;
+use super::open_tracker::OpenTracker;
+use super::download_queue::DownloadQueue;
 
 pub struct MountHandle {
     pub mountpoint: PathBuf,
     thread_handle: Option<std::thread::JoinHandle<()>>,
     terminate_flag: Arc<Mutex<bool>>,
+    open_tracker: Arc<OpenTracker>,
+    download_queue: Arc<DownloadQueue>,
 }
 
 impl MountHandle {
@@ -21,6 +25,8 @@ impl MountHandle {
 
 impl Drop for MountHandle {
     fn drop(&mut self) {
+        self.download_queue.cancel_all();
+        self.open_tracker.cancel_all();
         *self.terminate_flag.lock() = true;
         
         if let Some(handle) = self.thread_handle.take() {
@@ -50,14 +56,32 @@ impl Drop for MountHandle {
 pub struct MountManager {
     handle: Mutex<Option<MountHandle>>,
     client_ref: Arc<AsyncMutex<Option<Client>>>,
+    open_tracker: Arc<OpenTracker>,
+    download_queue: Arc<DownloadQueue>,
 }
 
 impl MountManager {
     pub fn new(client_ref: Arc<AsyncMutex<Option<Client>>>) -> Self {
+        let open_tracker = Arc::new(OpenTracker::new());
+        let download_queue = Arc::new(DownloadQueue::new(client_ref.clone()));
         Self {
             handle: Mutex::new(None),
             client_ref,
+            open_tracker,
+            download_queue,
         }
+    }
+
+    pub fn set_app_handle(&self, handle: tauri::AppHandle) {
+        self.open_tracker.set_app_handle(handle);
+    }
+
+    pub fn respond_dialog(&self, result: super::open_tracker::DialogResult) {
+        self.open_tracker.respond(result);
+    }
+
+    pub fn get_download_tasks(&self) -> Vec<super::download_queue::DownloadTask> {
+        self.download_queue.get_all_tasks()
     }
 
     pub fn mount<P: AsRef<Path>>(&self, mountpoint: P) -> Result<String> {
@@ -76,10 +100,10 @@ impl MountManager {
         let client_ref = self.client_ref.clone();
         let mountpoint_clone = mountpoint.clone();
         let terminate_flag = Arc::new(Mutex::new(false));
+        let open_tracker = self.open_tracker.clone();
+        let download_queue = self.download_queue.clone();
 
-        let filesystem = TVaultFS::new(client_ref);
-
-        let (ready_tx, ready_rx) = std::sync::mpsc::channel::<Result<()>>();
+        let filesystem = TVaultFS::new_with_shared(client_ref, open_tracker.clone(), download_queue.clone());
 
         let thread_handle = std::thread::spawn(move || {
             let options = vec![
@@ -92,11 +116,9 @@ impl MountManager {
             match fuser::mount2(filesystem, &mountpoint_clone, &options) {
                 Ok(_) => {
                     println!("T-Vault FUSE: Mount ended normally");
-                    let _ = ready_tx.send(Ok(()));
                 }
                 Err(e) => {
                     eprintln!("T-Vault FUSE: Mount error: {}", e);
-                    let _ = ready_tx.send(Err(anyhow::anyhow!("Mount failed: {}", e)));
                 }
             }
         });
@@ -105,6 +127,8 @@ impl MountManager {
             mountpoint: mountpoint.clone(),
             thread_handle: Some(thread_handle),
             terminate_flag,
+            open_tracker: self.open_tracker.clone(),
+            download_queue: self.download_queue.clone(),
         });
 
         println!("T-Vault FUSE: Mounted at {}", mountpoint.display());
@@ -115,6 +139,8 @@ impl MountManager {
         let mut handle_guard = self.handle.lock();
         
         if let Some(mut handle) = handle_guard.take() {
+            self.download_queue.cancel_all();
+            self.open_tracker.cancel_all();
             *handle.terminate_flag.lock() = true;
 
             #[cfg(target_os = "macos")]

@@ -5,6 +5,7 @@ use fuser::{
 };
 use std::ffi::OsStr;
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::time::{Duration, UNIX_EPOCH};
 use parking_lot::Mutex;
 use grammers_client::Client;
@@ -15,6 +16,8 @@ use libc::c_int;
 use crate::storage::FileMetadata;
 use super::inode_manager::InodeManager;
 use super::cache::{MetadataCache, FileCache};
+use super::download_queue::{DownloadQueue, DownloadStatus};
+use super::open_tracker::{OpenTracker, FileInfo};
 
 const TTL: Duration = Duration::from_secs(60);
 const BLOCK_SIZE: u64 = 512;
@@ -24,11 +27,13 @@ const ENOENT: c_int = 2;
 const EISDIR: c_int = 21;
 const EIO: c_int = 5;
 const EBADF: c_int = 9;
+const EACCES: c_int = 13;
 
 struct OpenHandle {
     file_id: String,
     file_name: String,
     size: u64,
+    destination: Option<PathBuf>,
     write_buffer: Option<Vec<u8>>,
     is_dirty: bool,
 }
@@ -38,20 +43,55 @@ pub struct TVaultFS {
     inode_manager: InodeManager,
     metadata_cache: MetadataCache,
     file_cache: FileCache,
+    download_queue: Arc<DownloadQueue>,
+    open_tracker: Arc<OpenTracker>,
     handles: Mutex<HashMap<u64, OpenHandle>>,
     next_handle: Mutex<u64>,
 }
 
 impl TVaultFS {
     pub fn new(client_ref: Arc<AsyncMutex<Option<Client>>>) -> Self {
+        let download_queue = Arc::new(DownloadQueue::new(client_ref.clone()));
+        let open_tracker = Arc::new(OpenTracker::new());
         Self {
             client_ref,
             inode_manager: InodeManager::new(),
             metadata_cache: MetadataCache::new(),
             file_cache: FileCache::new(),
+            download_queue,
+            open_tracker,
             handles: Mutex::new(HashMap::new()),
             next_handle: Mutex::new(1),
         }
+    }
+
+    pub fn new_with_shared(
+        client_ref: Arc<AsyncMutex<Option<Client>>>,
+        open_tracker: Arc<OpenTracker>,
+        download_queue: Arc<DownloadQueue>,
+    ) -> Self {
+        Self {
+            client_ref,
+            inode_manager: InodeManager::new(),
+            metadata_cache: MetadataCache::new(),
+            file_cache: FileCache::new(),
+            download_queue,
+            open_tracker,
+            handles: Mutex::new(HashMap::new()),
+            next_handle: Mutex::new(1),
+        }
+    }
+
+    pub fn set_app_handle(&self, handle: tauri::AppHandle) {
+        self.open_tracker.set_app_handle(handle);
+    }
+
+    pub fn respond_dialog(&self, result: super::open_tracker::DialogResult) {
+        self.open_tracker.respond(result);
+    }
+
+    pub fn get_download_tasks(&self) -> Vec<super::download_queue::DownloadTask> {
+        self.download_queue.get_all_tasks()
     }
 
     pub fn refresh_metadata(&self) -> anyhow::Result<()> {
@@ -126,6 +166,10 @@ impl Filesystem for TVaultFS {
         println!("T-Vault FUSE: Filesystem destroyed");
         self.inode_manager.clear_cache();
         self.metadata_cache.clear_cache();
+        self.download_queue.cancel_all();
+        self.open_tracker.cancel_all();
+        let mut handles = self.handles.lock();
+        handles.clear();
     }
 
     fn lookup(&mut self, _req: &Request, parent: u64, name: &OsStr, reply: ReplyEntry) {
@@ -212,15 +256,86 @@ impl Filesystem for TVaultFS {
         }
 
         if let Some(file) = self.inode_manager.inode_to_file(ino) {
+            let file_id = file.id.clone();
+            let file_name = file.name.clone();
+            let file_size = file.size;
+
+            if self.file_cache.get(&file_id).is_some() {
+                let handle = OpenHandle {
+                    file_id: file_id.clone(),
+                    file_name: file_name.clone(),
+                    size: file_size,
+                    destination: None,
+                    write_buffer: None,
+                    is_dirty: false,
+                };
+                self.handles.lock().insert(fh, handle);
+                reply.opened(fh, 0);
+                return;
+            }
+
+            if self.download_queue.has_pending(&file_id) {
+                let handle = OpenHandle {
+                    file_id: file_id.clone(),
+                    file_name: file_name.clone(),
+                    size: file_size,
+                    destination: None,
+                    write_buffer: None,
+                    is_dirty: false,
+                };
+                self.handles.lock().insert(fh, handle);
+                reply.opened(fh, 0);
+                return;
+            }
+
+            let file_info = FileInfo {
+                file_id: file_id.clone(),
+                file_name: file_name.clone(),
+                file_size,
+            };
+
+            let destination = match self.open_tracker.request_open(file_info) {
+                Some(path) => path,
+                None => {
+                    println!("T-Vault FUSE: User cancelled or timed out for '{}'", file_name);
+                    reply.error(EACCES);
+                    return;
+                }
+            };
+
+            if let Err(e) = self.download_queue.check_disk_space(file_size, &destination) {
+                eprintln!("T-Vault FUSE: Disk space check failed: {}", e);
+                reply.error(EIO);
+                return;
+            }
+
+            self.download_queue.enqueue(
+                file_id.clone(),
+                file_name.clone(),
+                file_size,
+                destination.clone(),
+            );
+
             let handle = OpenHandle {
-                file_id: file.id.clone(),
-                file_name: file.name.clone(),
-                size: file.size,
+                file_id: file_id.clone(),
+                file_name: file_name.clone(),
+                size: file_size,
+                destination: Some(destination),
                 write_buffer: None,
                 is_dirty: false,
             };
-            
             self.handles.lock().insert(fh, handle);
+
+            let queue = self.download_queue.clone();
+            std::thread::spawn(move || {
+                let rt = tokio::runtime::Handle::current();
+                rt.block_on(async {
+                    if let Err(e) = queue.process_next().await {
+                        eprintln!("T-Vault FUSE: Download processing error: {}", e);
+                    }
+                });
+            });
+
             reply.opened(fh, 0);
             return;
         }
@@ -261,7 +376,74 @@ impl Filesystem for TVaultFS {
             }
         }
 
-        reply.error(EIO);
+        {
+            let handles = self.handles.lock();
+            if let Some(handle) = handles.get(&_fh) {
+                if let Some(ref dest) = handle.destination {
+                    if dest.exists() {
+                        match std::fs::read(dest) {
+                            Ok(data) => {
+                                let _ = self.file_cache.put(&file_id, &data);
+                                let end = std::cmp::min(offset as usize + size as usize, data.len());
+                                if offset as usize <= data.len() {
+                                    reply.data(&data[offset as usize..end]);
+                                } else {
+                                    reply.data(&[]);
+                                }
+                                return;
+                            }
+                            Err(_) => {}
+                        }
+                    }
+                }
+            }
+        }
+
+        let status = self.download_queue.get_status(&file_id);
+        match status {
+            DownloadStatus::Downloading { progress } => {
+                println!("T-Vault FUSE: File '{}' still downloading ({}%), read will retry", 
+                         file_id, progress);
+                reply.error(EIO);
+            }
+            DownloadStatus::Pending => {
+                println!("T-Vault FUSE: File '{}' pending download", file_id);
+                reply.error(EIO);
+            }
+            DownloadStatus::Completed(path) => {
+                match std::fs::read(&path) {
+                    Ok(data) => {
+                        let _ = self.file_cache.put(&file_id, &data);
+                        let end = std::cmp::min(offset as usize + size as usize, data.len());
+                        if offset as usize <= data.len() {
+                            reply.data(&data[offset as usize..end]);
+                        } else {
+                            reply.data(&[]);
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("T-Vault FUSE: Failed to read downloaded file: {}", e);
+                        reply.error(EIO);
+                    }
+                }
+            }
+            DownloadStatus::Failed(e) => {
+                eprintln!("T-Vault FUSE: Download failed for '{}': {}", file_id, e);
+                let handles = self.handles.lock();
+                if let Some(handle) = handles.get(&_fh) {
+                    if let Some(ref dest) = handle.destination {
+                        self.download_queue.cleanup_partial(dest);
+                    }
+                }
+                reply.error(EIO);
+            }
+            DownloadStatus::Cancelled => {
+                reply.error(EACCES);
+            }
+            _ => {
+                reply.error(EIO);
+            }
+        }
     }
 
     fn write(&mut self, _req: &Request, _ino: u64, fh: u64, offset: i64, data: &[u8], 

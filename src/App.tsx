@@ -5,6 +5,7 @@ import ApiKeyScreen from './components/ApiKeyScreen';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
 import LoadingScreen from './components/LoadingScreen';
+import DownloadDialog from './components/DownloadDialog';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -62,6 +63,7 @@ function App() {
         ) : (
           <ApiKeyScreen onKeysSaved={handleKeysSaved} />
         )}
+        <DownloadDialog />
       </div>
     </ThemeProvider>
   );
